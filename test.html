@@ -1,43 +1,89 @@
-<!DOCTYPE html>
-<html>
+<!-- This Script is from www.html5freecode.com, Coded by: Kerixa Inc-->
+<br>
+<canvas id="myCanvas" width="400" height="230" onclick="DefinePaths(event)"></canvas>
+<script>
+    var cnv = document.getElementById('myCanvas')
+    var ctx = cnv.getContext('2d')
+    var deg = Math.PI / 180
+    DefinePaths(null)
 
-<head>
-    <script type='text/javascript'>//<![CDATA[ 
-        window.onload = function () {
-            var x = 120;
-            var y = 120;
-            var key, pos = 0;
-            var canvas = document.getElementById("canvas");
-            var ctx = canvas.getContext("2d");
-            var img = new Image();
-            img.onload = function () {
-                ctx.drawImage(img, x, y);
-            }
-            img.src = "http://www.infogridpacific.com/blog/i/ball_online.png";
-            document.onkeydown = function (e) {
-                pos = 1;
-                key = window.event ? e.keyCode : e.which;
-            }
+    function DefinePaths(event) {
 
-            ctx.fillStyle = "blue";
-            ctx.fillRect(50, 50, 60, 60);
+        ctx.beginPath()
+        ctx.moveTo(10, 70)
+        ctx.bezierCurveTo(60, 70, 60, 0, 110, 70)
+        if (event != null) {
+            if (IsInPath(event)) SelStyle()
+            else DifStyle()
+        } else DifStyle()
+        ctx.closePath()
+        ctx.fill()
+        ctx.stroke()
 
-            document.onkeyup = function (e) { pos = 0; }
-            setInterval(function () {
-                if (pos == 0) return;
-                if (key == 37) x -= 2;
-                if (key == 38) y -= 2;
-                if (key == 39) x += 2;
-                if (key == 40) y += 2;
-                // canvas.width = canvas.width;
-                ctx.drawImage(img, x, y);
-            }, 5);
-        }//]]>  
-    </script>
-</head>
+        ctx.beginPath()
+        ctx.moveTo(200, 20)
+        ctx.lineTo(250, 20)
+        ctx.quadraticCurveTo(280, 20, 280, 40)
+        ctx.lineTo(280, 80)
+        ctx.quadraticCurveTo(260, 80, 250, 100)
+        ctx.lineTo(200, 100)
+        ctx.quadraticCurveTo(190, 80, 170, 80)
+        ctx.lineTo(170, 40)
+        ctx.quadraticCurveTo(170, 20, 200, 20)
+        if (event != null) {
+            if (IsInPath(event)) SelStyle()
+            else DifStyle()
+        } else DifStyle()
+        ctx.closePath()
+        ctx.fill()
+        ctx.stroke()
 
-<body>
-    <canvas id="canvas" width="300" height="300"></canvas>
-</body>
+        ctx.beginPath()
+        ctx.moveTo(10, 130)
+        ctx.lineTo(10, 200)
+        ctx.lineTo(100, 200)
+        if (event != null) {
+            if (IsInPath(event)) SelStyle()
+            else DifStyle()
+        } else DifStyle()
+        ctx.closePath()
+        ctx.fill()
+        ctx.stroke()
 
-</html>
+        ctx.beginPath()
+        ctx.moveTo(220, 130)
+        ctx.lineTo(170, 180)
+        ctx.lineTo(220, 230)
+        ctx.lineTo(270, 180)
+        if (event != null) {
+            if (IsInPath(event)) SelStyle()
+            else DifStyle()
+        } else DifStyle()
+        ctx.closePath()
+        ctx.fill()
+        ctx.stroke()
+    }
+
+    function IsInPath(event) {
+        var bb, x, y
+        bb = cnv.getBoundingClientRect()
+        x = (event.clientX - bb.left) * (cnv.width / bb.width)
+        y = (event.clientY - bb.top) * (cnv.height / bb.height)
+        return ctx.isPointInPath(x, y)
+    }
+
+    function SelStyle() {
+        ctx.lineWidth = 2
+        ctx.strokeStyle = "brown"
+        ctx.fillStyle = "cyan"
+    }
+    function DifStyle() {
+        ctx.lineWidth = 2
+        ctx.fillStyle = "gray"
+        ctx.strokeStyle = "darkblue"
+    }
+</script>
+<div style="text-align: left">
+    <font face="Tahoma"><br><a target="_blank" href="http://www.html5freecode.com"><span
+                style="font-size: 8pt; text-decoration: none">HTML5 Free Code</span></a></font>
+</div>

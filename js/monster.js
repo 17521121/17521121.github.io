@@ -8,13 +8,16 @@ class Monster {
         this.name = null;
         this.image = null;
         this.type = null;
+
+        this.gameAngle = Math.atan(this.game.GAME_WIDTH / this.game.GAME_HEIGHT);
+
         this.init();
     }
 
     init() {
         this.posX = 0;
         this.posY = 0;
-        this.speed = 4;
+        this.speed = 5;
 
         this.image = new Image();
       
@@ -28,7 +31,7 @@ class Monster {
         this.game.ctx.drawImage(
             this.image,
             this.posX,
-            this.posY,
+            this.posY + this.game.OFFSET_Y,
             this.game.CELL_SIZE,
             this.game.CELL_SIZE
         );
@@ -36,14 +39,13 @@ class Monster {
  
     update() {
         // chim bay
-        console.log(this.posX, this.posY);
-        if(this.posX > this.game.GAME_WIDTH || this.posY > this.game.GAME_HEIGHT) {
+        if(this.posX > this.game.GAME_WIDTH + 200 || this.posY > this.game.GAME_HEIGHT + 200) {
             return;
         }
         if(this.type == "bird") {
-            let angle = Math.atan(this.game.GAME_WIDTH / this.game.GAME_HEIGHT);
-            this.posY += this.speed * Math.cos(angle);
-            this.posX += this.speed * Math.sin(angle);
+            
+            this.posY += this.speed * Math.cos(this.gameAngle);
+            this.posX += this.speed * Math.sin(this.gameAngle);
         }
     }
 
