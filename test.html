@@ -1,89 +1,60 @@
-<!-- This Script is from www.html5freecode.com, Coded by: Kerixa Inc-->
-<br>
-<canvas id="myCanvas" width="400" height="230" onclick="DefinePaths(event)"></canvas>
-<script>
-    var cnv = document.getElementById('myCanvas')
-    var ctx = cnv.getContext('2d')
-    var deg = Math.PI / 180
-    DefinePaths(null)
+<!DOCTYPE html>
+<html lang="en">
 
-    function DefinePaths(event) {
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.min.js"></script>
+    <!-- <base href="https://phaser.io" target="_blank"> -->
+</head>
 
-        ctx.beginPath()
-        ctx.moveTo(10, 70)
-        ctx.bezierCurveTo(60, 70, 60, 0, 110, 70)
-        if (event != null) {
-            if (IsInPath(event)) SelStyle()
-            else DifStyle()
-        } else DifStyle()
-        ctx.closePath()
-        ctx.fill()
-        ctx.stroke()
+<body>
+    <script>
 
-        ctx.beginPath()
-        ctx.moveTo(200, 20)
-        ctx.lineTo(250, 20)
-        ctx.quadraticCurveTo(280, 20, 280, 40)
-        ctx.lineTo(280, 80)
-        ctx.quadraticCurveTo(260, 80, 250, 100)
-        ctx.lineTo(200, 100)
-        ctx.quadraticCurveTo(190, 80, 170, 80)
-        ctx.lineTo(170, 40)
-        ctx.quadraticCurveTo(170, 20, 200, 20)
-        if (event != null) {
-            if (IsInPath(event)) SelStyle()
-            else DifStyle()
-        } else DifStyle()
-        ctx.closePath()
-        ctx.fill()
-        ctx.stroke()
+        var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create, render: render });
 
-        ctx.beginPath()
-        ctx.moveTo(10, 130)
-        ctx.lineTo(10, 200)
-        ctx.lineTo(100, 200)
-        if (event != null) {
-            if (IsInPath(event)) SelStyle()
-            else DifStyle()
-        } else DifStyle()
-        ctx.closePath()
-        ctx.fill()
-        ctx.stroke()
+        function preload() {
 
-        ctx.beginPath()
-        ctx.moveTo(220, 130)
-        ctx.lineTo(170, 180)
-        ctx.lineTo(220, 230)
-        ctx.lineTo(270, 180)
-        if (event != null) {
-            if (IsInPath(event)) SelStyle()
-            else DifStyle()
-        } else DifStyle()
-        ctx.closePath()
-        ctx.fill()
-        ctx.stroke()
-    }
+            game.load.image('ball', 'img/bigBee.png');
 
-    function IsInPath(event) {
-        var bb, x, y
-        bb = cnv.getBoundingClientRect()
-        x = (event.clientX - bb.left) * (cnv.width / bb.width)
-        y = (event.clientY - bb.top) * (cnv.height / bb.height)
-        return ctx.isPointInPath(x, y)
-    }
+        }
 
-    function SelStyle() {
-        ctx.lineWidth = 2
-        ctx.strokeStyle = "brown"
-        ctx.fillStyle = "cyan"
-    }
-    function DifStyle() {
-        ctx.lineWidth = 2
-        ctx.fillStyle = "gray"
-        ctx.strokeStyle = "darkblue"
-    }
-</script>
-<div style="text-align: left">
-    <font face="Tahoma"><br><a target="_blank" href="http://www.html5freecode.com"><span
-                style="font-size: 8pt; text-decoration: none">HTML5 Free Code</span></a></font>
-</div>
+        var counter = 0;
+        var text = 0;
+
+        function create() {
+
+            game.stage.backgroundColor = '#6688ee';
+
+            text = game.add.text(game.world.centerX, game.world.centerY, 'Counter: 0', { font: "64px Arial", fill: "#ffffff", align: "center" });
+            text.anchor.setTo(0.5, 0.5);
+
+            //  Here we'll create a basic looped event.
+            //  A looped event is like a repeat event but with no limit, it will literally repeat itself forever, or until you stop it.
+
+            //  The first parameter is how long to wait before the event fires. In this case 1 second (you could pass in 1000 as the value as well.)
+            //  The next two parameters are the function to call ('updateCounter') and the context under which that will happen.
+
+            game.time.events.loop(Phaser.Timer.SECOND, updateCounter, this);
+
+        }
+
+        function updateCounter() {
+
+            counter++;
+
+            text.setText('Counter: ' + counter);
+
+        }
+
+        function render() {
+
+            game.debug.text("Time until event: " + game.time.events.duration.toFixed(0), 32, 32);
+            game.debug.text("Next tick: " + game.time.events.next.toFixed(0), 32, 64);
+
+        }
+    </script>
+</body>
+
+</html>
