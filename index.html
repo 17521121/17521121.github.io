@@ -15,8 +15,8 @@
 <body>
 
     <script>
-        var fire = null
-        var range = 40
+        var towers = []
+        var range = 20
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -90,11 +90,13 @@
             for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
                 for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
                     if (!COLLISION[i][j]) {
-                        let square = this.add.image(
-                            j * CELL_SIZE + 20,
-                            i * CELL_SIZE + OFFSET_Y,
-                            "square"
-                        ).setDisplaySize(40, 45);
+                        let square =
+                            this.add.image(
+                                j * CELL_SIZE + 20,
+                                i * CELL_SIZE + OFFSET_Y,
+                                "frozen"
+                            ).setDisplaySize(40, 45);
+                        towers.push(square)
                     }
                 }
 
@@ -115,7 +117,7 @@
             })
 
             //Tháp đã xây
-            fire = this.add.image(CELL_SIZE * 8 + 20, OFFSET_Y + CELL_SIZE * 8, "arrow").setDisplaySize(40, 40);
+            // fire = this.add.image(CELL_SIZE * 8 + 20, OFFSET_Y + CELL_SIZE * 8, "arrow").setDisplaySize(40, 40);
 
             tower1.on("over", function (pointer, deltaX, deltaY, deltaZ) {
                 //show tower info
@@ -139,11 +141,32 @@
                     delay: i * 650, callback: () => {
                         let monster = this.physics.add.image(20, OFFSET_Y, "bigBee");
                         monster.setDisplaySize(40, 40);
-                        monster.speed = 300;
+                        monster.speed = 150;
                         monsters.push(monster)
                     }, callbackScope: this, loop: false
                 });
             }
+        }
+
+        function fire(monsters, towers) {
+            //fire
+            towers.forEach(fire => {
+                let count = 0;
+                monsters.forEach(element => {
+                    if (element.x > fire.x - range && element.x < fire.x + range
+                        && element.y > fire.y - range && element.y < fire.y + range
+
+                    ) {
+                        count++;
+                    }
+
+                })
+                if (count > 0)
+                    fire.setDisplaySize(90, 90)
+                else {
+                    fire.setDisplaySize(40, 40)
+                }
+            })
         }
 
         function update() {
@@ -154,32 +177,12 @@
 
 
             //monster move
-            let count = 0;
             monsters.forEach(element => {
                 element.setVelocity(element.speed, element.speed)
-
-                //fire
-
-                if (element.x > fire.x - 20 && element.x < fire.x + 20
-                    && element.y > fire.y - 20 && element.y < fire.y + 20
-
-                ) {
-                    count++;
-                 
-                }
-                else {
-                    count--;
-                   
-                }
-                if(count + monsters.length > 0) {
-                    fire.setDisplaySize(45,45)
-                }
-                else {
-                    fire.setDisplaySize(40,40)
-                }
             });
 
-
+            //fire
+            fire(monsters, fires)
 
         }
     </script>
