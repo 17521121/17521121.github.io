@@ -15,7 +15,8 @@
 <body>
 
     <script>
-
+        var fire = null
+        var range = 40
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -113,9 +114,12 @@
                 console.log("ok")
             })
 
+            //Tháp đã xây
+            fire = this.add.image(CELL_SIZE * 8 + 20, OFFSET_Y + CELL_SIZE * 8, "arrow").setDisplaySize(40, 40);
+
             tower1.on("over", function (pointer, deltaX, deltaY, deltaZ) {
                 //show tower info
-                
+
             })
             this.add.image(580, 250, "arrow").setDisplaySize(40, 40);
             this.add.image(580, 300, "arrow").setDisplaySize(40, 40);
@@ -125,8 +129,8 @@
             this.add.image(640, 350, "frozen").setDisplaySize(40, 40);
 
             //Wave
-            let monsterRespawnEvent = this.time.addEvent({ delay: 10000, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
-
+            // let monsterRespawnEvent = this.time.addEvent({ delay: 10000, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
+            monsterRespawn.call(this, 15)
         }
 
         function monsterRespawn(number) {
@@ -135,7 +139,7 @@
                     delay: i * 650, callback: () => {
                         let monster = this.physics.add.image(20, OFFSET_Y, "bigBee");
                         monster.setDisplaySize(40, 40);
-                        monster.speed = 100;
+                        monster.speed = 300;
                         monsters.push(monster)
                     }, callbackScope: this, loop: false
                 });
@@ -148,10 +152,34 @@
                 return
             }
 
+
             //monster move
+            let count = 0;
             monsters.forEach(element => {
                 element.setVelocity(element.speed, element.speed)
+
+                //fire
+
+                if (element.x > fire.x - 20 && element.x < fire.x + 20
+                    && element.y > fire.y - 20 && element.y < fire.y + 20
+
+                ) {
+                    count++;
+                 
+                }
+                else {
+                    count--;
+                   
+                }
+                if(count + monsters.length > 0) {
+                    fire.setDisplaySize(45,45)
+                }
+                else {
+                    fire.setDisplaySize(40,40)
+                }
             });
+
+
 
         }
     </script>
