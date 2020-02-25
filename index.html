@@ -20,7 +20,7 @@
 
         var bullets = []
 
-        var range = 20
+        var range = 100
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -81,7 +81,7 @@
             this.load.image('bigBee', '/img/bigBee.png');
             this.load.image('frozen', '/img/frozen.png');
             this.load.image('arrow', '/img/arrow.png');
-            this.load.image('bullet', '/img/bullet1.png');
+            this.load.image('bullet', '/img/bullet.png');
             // this.load.scenePlugin({
             //     key: 'rexbulletplugin',
             //     url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexbulletplugin.min.js',
@@ -158,11 +158,12 @@
                     delay: i * 650, callback: () => {
                         let monster = this.physics.add.image(20, OFFSET_Y, "bigBee");
                         monster.setDisplaySize(40, 40);
-                        monster.speed = 50;
+                        monster.setVelocity(80, 80)
                         monsters.push(monster)
                     }, callbackScope: this, loop: false
                 });
             }
+
         }
 
         function fire(monsters, towers) {
@@ -185,29 +186,17 @@
                     fire.setDisplaySize(90, 90)
                     fire.isReady = false;
                     this.time.addEvent({
-                        delay: 1000, callback: () => {
+                        delay: 2000, callback: () => {
                             fire.isReady = true;
                         }, callbackScope: this, loop: false
                     });
                     //Tạo đạn và bắn
 
-                    let bullet = this.add.image(fire.x, fire.y, 'bullet');
-                    bullet.setDisplaySize(30, 30);
+                    let bullet = this.physics.add.image(fire.x, fire.y, 'bullet');
                     bullet.setTint("0xffffff")
-                    
-                    
-
-                    let tween = this.tweens.add({
-                        targets: bullet,
-                        x: monsters[0].x,
-                        y: monsters[0].y,
-                        // duration: 3000,
-                        // ease: 'Power3',
-                        speed: {x: 100, y: 100}
-                    });
-                    tween.target = monsters[0]
-
-                    bullets.push(tween)
+                    bullet.setDisplaySize(30, 30);
+                    bullet.speed = 200
+                    bullets.push(bullet)
 
                 }
 
@@ -216,26 +205,35 @@
                 }
             })
         }
+        function bulletAim(bullet, target) {
+            //angel
+            let angle = Math.atan2( Math.abs(target.x - bullet.x), Math.abs(target.y - bullet.y ));
+            
+            if (target.x > bullet.x) {
+                bullet.setVelocityX(bullet.speed * Math.sin(angle))
+            }
+            else {
+                bullet.setVelocityX(-1 * bullet.speed * Math.sin(angle))
+            }
 
+            if (target.y > bullet.y) {
+                bullet.setVelocityY(bullet.speed * Math.cos(angle))
+            }
+            else {
+                bullet.setVelocityY(-1 * bullet.speed * Math.cos(angle))
+            }
+
+        }
         function update() {
             //end game
             if (life < 1) {
                 return
             }
 
-
-            //monster move
-            monsters.forEach(element => {
-                element.setVelocity(element.speed, element.speed)
-            });
-
-            bullets.forEach(tween => {
-                tween.updateTo('x', tween.target.x, true);
-                tween.updateTo('y', tween.target.y, true);
-                // tween.updateTo('x', 600, true);
-                // tween.updateTo('y', 600, true);
+            //Cập nhật đường đạn
+            bullets.forEach(bullet => {
+                bulletAim.call(this, bullet, monsters[0]);
             })
-            // console.log(bullets.length)
 
             //fire
             fire.call(this, monsters, towers)
