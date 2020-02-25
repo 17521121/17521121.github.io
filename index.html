@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Sinh tử môn</title>
 
     <link rel="stylesheet" href="/css/style.css">
     <!-- <script src="https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.js"></script> -->
@@ -16,6 +16,10 @@
 
     <script>
         var towers = []
+        var tower1; //test
+
+        var bullets = []
+
         var range = 20
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -32,6 +36,8 @@
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ];
+
+
 
         var OFFSET_Y = 100;
         var OFFSET_RIGHT_X = 180;
@@ -57,9 +63,9 @@
             height: 650,
             physics: {
                 default: 'arcade',
-                arcade: {
-                    gravity: { y: 200 }
-                }
+                // arcade: {
+                //     gravity: { y: 200 }
+                // }
             },
             scene: {
                 preload: preload,
@@ -75,6 +81,14 @@
             this.load.image('bigBee', '/img/bigBee.png');
             this.load.image('frozen', '/img/frozen.png');
             this.load.image('arrow', '/img/arrow.png');
+            this.load.image('bullet', '/img/bullet1.png');
+            // this.load.scenePlugin({
+            //     key: 'rexbulletplugin',
+            //     url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexbulletplugin.min.js',
+            //     sceneKey: 'rexbulletplugin'
+            // });
+            // this.load.scenePlugin("/","https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexbulletplugin.min.js" ,"rexbulletplugin")
+
 
             wave = {
                 id: 1,
@@ -83,6 +97,8 @@
 
             life = 10;
             gold = 250;
+
+
         }
 
         function create() {
@@ -96,6 +112,7 @@
                                 i * CELL_SIZE + OFFSET_Y,
                                 "frozen"
                             ).setDisplaySize(40, 45);
+                        square.isReady = true;
                         towers.push(square)
                     }
                 }
@@ -109,7 +126,7 @@
             // tháp mẫu
             this.add.text(560, 200, 'Tháp', { fontSize: '20px', fill: '#aaa' });
             this.add.text(560, 420, 'Skill', { fontSize: '20px', fill: '#aaa' });
-            let tower1 = this.add.image(580, 250, "arrow").setDisplaySize(40, 40);
+            tower1 = this.add.image(580, 250, "arrow").setDisplaySize(40, 40);
             tower1.setInteractive();
             tower1.on("wheel", function (pointer, deltaX, deltaY, deltaZ) {
                 //drag drop tower
@@ -136,12 +153,12 @@
         }
 
         function monsterRespawn(number) {
-            for (let i = 0; i < number; i++) {
+            for (let i = 0; i < 1; i++) {
                 this.time.addEvent({
                     delay: i * 650, callback: () => {
                         let monster = this.physics.add.image(20, OFFSET_Y, "bigBee");
                         monster.setDisplaySize(40, 40);
-                        monster.speed = 150;
+                        monster.speed = 50;
                         monsters.push(monster)
                     }, callbackScope: this, loop: false
                 });
@@ -150,19 +167,50 @@
 
         function fire(monsters, towers) {
             //fire
+
             towers.forEach(fire => {
                 let count = 0;
                 monsters.forEach(element => {
                     if (element.x > fire.x - range && element.x < fire.x + range
                         && element.y > fire.y - range && element.y < fire.y + range
-
+                        &&
+                        fire.isReady //sẵn sàng bắn // chờ nạp đạn
                     ) {
                         count++;
                     }
 
                 })
-                if (count > 0)
+                if (count > 0) {
+
                     fire.setDisplaySize(90, 90)
+                    fire.isReady = false;
+                    this.time.addEvent({
+                        delay: 1000, callback: () => {
+                            fire.isReady = true;
+                        }, callbackScope: this, loop: false
+                    });
+                    //Tạo đạn và bắn
+
+                    let bullet = this.add.image(fire.x, fire.y, 'bullet');
+                    bullet.setDisplaySize(30, 30);
+                    bullet.setTint("0xffffff")
+                    
+                    
+
+                    let tween = this.tweens.add({
+                        targets: bullet,
+                        x: monsters[0].x,
+                        y: monsters[0].y,
+                        // duration: 3000,
+                        // ease: 'Power3',
+                        speed: {x: 100, y: 100}
+                    });
+                    tween.target = monsters[0]
+
+                    bullets.push(tween)
+
+                }
+
                 else {
                     fire.setDisplaySize(40, 40)
                 }
@@ -181,8 +229,16 @@
                 element.setVelocity(element.speed, element.speed)
             });
 
+            bullets.forEach(tween => {
+                tween.updateTo('x', tween.target.x, true);
+                tween.updateTo('y', tween.target.y, true);
+                // tween.updateTo('x', 600, true);
+                // tween.updateTo('y', 600, true);
+            })
+            // console.log(bullets.length)
+
             //fire
-            fire(monsters, fires)
+            fire.call(this, monsters, towers)
 
         }
     </script>
