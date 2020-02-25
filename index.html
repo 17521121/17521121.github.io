@@ -17,8 +17,10 @@
     <script>
         var towers = []
         var tower1; //test
-
+        var temp;
         var bullets = []
+
+        var isBuying = false;
 
         var range = 100
         var COLLISION = [
@@ -82,13 +84,6 @@
             this.load.image('frozen', '/img/frozen.png');
             this.load.image('arrow', '/img/arrow.png');
             this.load.image('bullet', '/img/bullet.png');
-            // this.load.scenePlugin({
-            //     key: 'rexbulletplugin',
-            //     url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexbulletplugin.min.js',
-            //     sceneKey: 'rexbulletplugin'
-            // });
-            // this.load.scenePlugin("/","https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexbulletplugin.min.js" ,"rexbulletplugin")
-
 
             wave = {
                 id: 1,
@@ -97,7 +92,6 @@
 
             life = 10;
             gold = 250;
-
 
         }
 
@@ -110,10 +104,10 @@
                             this.add.image(
                                 j * CELL_SIZE + 20,
                                 i * CELL_SIZE + OFFSET_Y,
-                                "frozen"
+                                "square"
                             ).setDisplaySize(40, 45);
-                        square.isReady = true;
-                        towers.push(square)
+
+
                     }
                 }
 
@@ -123,29 +117,43 @@
             this.add.text(300, 50, `Đợt ${wave.id}`, { fontSize: '20px', fill: '#aaa' });
 
             goldText = this.add.text(560, 180, `Vàng: ${gold}`, { fontSize: '20px', fill: '#aaa' });
+
+
             // tháp mẫu
             this.add.text(560, 200, 'Tháp', { fontSize: '20px', fill: '#aaa' });
             this.add.text(560, 420, 'Skill', { fontSize: '20px', fill: '#aaa' });
+
+
+
             tower1 = this.add.image(580, 250, "arrow").setDisplaySize(40, 40);
             tower1.setInteractive();
-            tower1.on("wheel", function (pointer, deltaX, deltaY, deltaZ) {
-                //drag drop tower
-                console.log("ok")
-            })
-
-            //Tháp đã xây
-            // fire = this.add.image(CELL_SIZE * 8 + 20, OFFSET_Y + CELL_SIZE * 8, "arrow").setDisplaySize(40, 40);
-
-            tower1.on("over", function (pointer, deltaX, deltaY, deltaZ) {
-                //show tower info
-
-            })
-            this.add.image(580, 250, "arrow").setDisplaySize(40, 40);
             this.add.image(580, 300, "arrow").setDisplaySize(40, 40);
             this.add.image(580, 350, "arrow").setDisplaySize(40, 40);
             this.add.image(640, 250, "frozen").setDisplaySize(40, 40);
             this.add.image(640, 300, "frozen").setDisplaySize(40, 40);
             this.add.image(640, 350, "frozen").setDisplaySize(40, 40);
+
+
+            tower1.on("pointerdown", (pointer) => {
+                //tạo tháp từ con trỏ chuột
+                //if gold >= tower.price
+                isBuying = true;
+                temp = this.add.image(pointer.x, pointer.y, "arrow");
+                temp.setDisplaySize(40, 40)
+                temp.setAlpha(0.5)
+                temp.setInteractive({ draggable: true })
+                temp.on('drag', function (pointer, dragX, dragY) {
+
+                    this.x = dragX;
+                    this.y = dragY;
+
+                });
+            })
+            tower1.on("pointermove", (pointer) => {
+                //tạo tháp từ con trỏ chuột
+                //if gold >= tower.price
+                // this.physics.moveToObject(temp, pointer, 240);
+            })
 
             //Wave
             // let monsterRespawnEvent = this.time.addEvent({ delay: 10000, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
@@ -207,8 +215,8 @@
         }
         function bulletAim(bullet, target) {
             //angel
-            let angle = Math.atan2( Math.abs(target.x - bullet.x), Math.abs(target.y - bullet.y ));
-            
+            let angle = Math.atan2(Math.abs(target.x - bullet.x), Math.abs(target.y - bullet.y));
+
             if (target.x > bullet.x) {
                 bullet.setVelocityX(bullet.speed * Math.sin(angle))
             }
