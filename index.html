@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="/css/style.css">
     <!-- <script src="https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script> -->
+
     <script src="/js/mazePuzzle.js"></script>
 </head>
 
@@ -20,14 +22,17 @@
 
         var graphics;
         var towers = []
+
         var tower1; //test
         var temp;
+
+
         var bullets = []
         var follower = null;
         var isBuying = false;
         var monsterVecs = []
-        var range = 80
-        
+        var lifeText;
+
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -98,19 +103,20 @@
             };
 
             life = 10;
-            gold = 250;
+            // gold = 250;
+            gold = 10000;
 
             graphics = this.add.graphics();
-            
+
             mazePuzzle = findWay(COLLISION, START_POS, END_POS);
             // console.log(mazePuzzle)
         }
 
         function create() {
-            // ô vuông
+            // init square
             for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
                 for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
-                    if ( !COLLISION[i][j]) {
+                    if (!COLLISION[i][j]) {
                         let square =
                             this.add.image(
                                 j * CELL_SIZE + 20,
@@ -118,15 +124,35 @@
                                 "square"
                             ).setDisplaySize(40, 45);
 
-                        //Buying
+                        square.posX = j
+                        square.posY = i
+                         
+                        //decide buy
                         square.setInteractive()
                         square.on("pointerdown", (pointer) => {
                             console.log("clicked square")
-                            if (isBuying) {
+                            if (isBuying && gold >= 70) {
+                                //Check isOkPath
+                                // pathOfMonsters.forEach()
+
+                                //if
+                                    //Kiểm tra xây được không
+
+
+                                    //Cập nhật lại đường đi quái vật landing
+                                //end if
+                               
                                 let tower = this.add.image(square.x, square.y, "arrow");
+                                // console.log(square.x, square.y)
                                 tower.setDisplaySize(40, 40)
                                 tower.setDepth(-1)
                                 tower.isReady = true;
+                                tower.range = 80
+                                tower.price = 70
+
+                                gold -= tower.price
+                                goldText.setText(`Vàng: ${gold}`)
+                                // square.disableBody(true, true);
                                 towers.push(tower)
                             }
                         })
@@ -136,9 +162,12 @@
 
             }
 
+            //end square
+
             this.add.text(1, 60, 'Cửa vào', { fontSize: '15px', fill: '#aaa' });
             this.add.text(445, 605, 'Cửa ra', { fontSize: '20px', fill: '#aaa' });
             this.add.text(300, 50, `Đợt ${wave.id}`, { fontSize: '20px', fill: '#aaa' });
+            lifeText = this.add.text(300, 150, `Máu ${life}`, { fontSize: '20px', fill: '#aaa' });
 
             goldText = this.add.text(560, 180, `Vàng: ${gold}`, { fontSize: '20px', fill: '#aaa' });
 
@@ -149,6 +178,7 @@
 
 
             tower1 = this.add.image(580, 250, "arrow").setDisplaySize(40, 40);
+            tower1.price = 70
             tower1.setInteractive();
             this.add.image(580, 300, "arrow").setDisplaySize(40, 40);
             this.add.image(580, 350, "arrow").setDisplaySize(40, 40);
@@ -158,22 +188,25 @@
 
             tower1.on("pointerdown", (pointer) => {
                 //tạo tháp từ con trỏ chuột
-                //if gold >= tower.price
-
-                if (isBuying) {
-                    temp.destroy();
+                if (gold >= tower1.price) {
+                    if (isBuying) {
+                        temp.destroy();
+                    }
+                    isBuying = true;
+                    temp = this.physics.add.image(pointer.x, pointer.y, "arrow");
+                    temp.setDisplaySize(40, 40)
+                    temp.setAlpha(0.5)
+                    
                 }
-
-                isBuying = true;
-                temp = this.physics.add.image(pointer.x, pointer.y, "arrow");
-                temp.setDisplaySize(40, 40)
-                temp.setAlpha(0.5)
-
             })
 
             //Wave
             // let monsterRespawnEvent = this.time.addEvent({ delay: 10000, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
             monsterRespawn.call(this, 15)
+        }
+        function monsterReachEndpoint(tween, target, sprite) {
+            life -= 1;
+            lifeText.setText(`Máu: ${life}`)
         }
 
         function monsterRespawn(number) {
@@ -225,7 +258,8 @@
                                 ease: 'start',
                                 duration: duration, // change
                                 yoyo: false,
-                                repeat: -2
+                                repeat: -2,
+                                onComplete: monsterReachEndpoint,
                             });
 
 
@@ -248,22 +282,34 @@
             bullet.destroy();
         }
 
+        function getDistance(objectA, objectB) {
+            return Math.sqrt(
+                (objectA.x - objectB.x) * (objectA.x - objectB.x)
+                +
+                (objectA.y - objectB.y) * (objectA.y - objectB.y)
+            )
+        }
+
         function shoot(monsters, towers) {
             //shoot
             towers.forEach(tower => {
-                let count = 0;
-                monsters.forEach(monster => {
-                    if (monster.x > tower.x - range && monster.x < tower.x + range
-                        && monster.y > tower.y - range && monster.y < tower.y + range
-                        && tower.isReady //sẵn sàng bắn // chờ nạp đạn
-                    ) {
-                        count++;
-                    }
+                let minDistance = tower.range
 
+                monsters.forEach(monster => {
+                    let dist = getDistance(tower, monster)
+                    if (
+                        tower.isReady //sẵn sàng bắn // chờ nạp đạn
+                        && minDistance > dist
+                    ) {
+                        minDistance = dist
+                        tower.target = monster
+                    }
                 })
-                if (count > 0) {
+
+                if (minDistance < tower.range) {
                     //nạp đạn
                     tower.setTint("0xff00")
+                    // tower.setAlpha(0.5)
                     tower.isReady = false;
                     this.time.addEvent({
                         delay: 2000, callback: () => {
@@ -282,16 +328,12 @@
                     bullet.setDisplaySize(30, 30);
                     bullet.speed = 200
                     bullet.setDepth(1)
-                    this.input.enableDebug(bullet, 0xff00ff);
-
                     //Giảm range của collider
+                    bullet.target = tower.target
                     bullet.setCircle(45)
-
                     this.physics.add.overlap(bullet, monsters[0], dealDamage, null, this);
-                    //the same above
-                    // this.physics.add.collider(bullet, monsters[0], null,  () => {
-                    //      dealDamage.call(this, bullet, monsters[0])
-                    // }, this);
+
+                    // this.input.enableDebug(bullet, 0xff00ff);
                     bullets.push(bullet)
                 }
 
@@ -338,7 +380,7 @@
             monsters.forEach((monster, index) => {
                 graphics.lineStyle(2, 0xffffff, 1);
                 if (monster.type == "landing") {
-                    
+
                     graphics.lineStyle(2, 0xffffff, 1);
 
                     pathOfMonsters[index].draw(graphics);
@@ -370,7 +412,7 @@
             this.input.on("pointerdown", (pointer) => {
                 if (isBuying
                     && pointer.y > GAME_HEIGHT + OFFSET_Y
-                    // && pointer.y > OFFSET_Y + GAME_HEIGHT
+                    && pointer.y > OFFSET_Y + GAME_HEIGHT
                 ) {
                     console.log("clicked everywhere")
                     isBuying = false;
@@ -378,11 +420,9 @@
                 }
             })
 
-
             //Cập nhật đường đạn
-            bullets.forEach(bullet => {
-                moveTo.call(this, bullet, monsters[0], bullet.speed);
-            })
+            bullets.forEach(bullet => moveTo.call(this, bullet, bullet.target, bullet.speed));
+
 
             //fire
             shoot.call(this, monsters, towers)
