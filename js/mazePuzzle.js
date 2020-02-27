@@ -15,14 +15,20 @@
 //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1]
 // ];
 
-// var start = [0, 0];
-// var end = [13, 12];
+// var START_POS = [0, 0];
+// var END_POS = [13, 12];
 
-// var path = findWay(start, end);
+// var path = findWay(START_POS, END_POS);
 // console.log(JSON.stringify(path))
+// console.log(path)
 
-function findWay(position, end) {
+function findWay(matrix, position, end) {
     var queue = [];
+
+    let COLLISION = new Array(matrix.length);
+    for (let i = 0; i < matrix.length; i++) {
+        COLLISION[i] = matrix[i].slice(0);
+    }
 
     COLLISION[position[0]][position[1]] = 1;
     queue.push([position]); // store a path, not just a position
@@ -61,6 +67,5 @@ function findWay(position, end) {
     }
 
     // Can't solve
-    return 0
+    return 0;
 }
-

@@ -9,36 +9,44 @@
     <link rel="stylesheet" href="/css/style.css">
     <!-- <script src="https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.min.js"></script>
-
+    <script src="/js/mazePuzzle.js"></script>
 </head>
 
 <body>
 
     <script>
+
+        var mazePuzzle;
+
+        var graphics;
         var towers = []
         var tower1; //test
         var temp;
         var bullets = []
-
+        var follower = null;
         var isBuying = false;
-
-        var range = 30
+        var monsterVecs = []
+        var range = 80
+        
         var COLLISION = [
-            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1]
         ];
 
+        var START_POS = [0, 0];
+        var END_POS = [13, 12];
 
 
         var OFFSET_Y = 100;
@@ -47,27 +55,26 @@
         var GAME_WIDTH = 520;
         var GAME_HEIGHT = 520;
         var CELL_SIZE = 40;
-        var START_POS = {
-            x: 0,
-            y: 0
-        };
+
 
         var monsters = [];
-        var square = null;
+        var pathOfMonsters = []
 
         var gold = null;
         var tower = null;
 
         var goldText = null;
+
         var config = {
             type: Phaser.AUTO,
             width: 700,
             height: 650,
             physics: {
                 default: 'arcade',
-                // arcade: {
-                //     gravity: { y: 200 }
-                // }
+                arcade: {
+                    debug: true,
+
+                }
             },
             scene: {
                 preload: preload,
@@ -93,13 +100,17 @@
             life = 10;
             gold = 250;
 
+            graphics = this.add.graphics();
+            
+            mazePuzzle = findWay(COLLISION, START_POS, END_POS);
+            // console.log(mazePuzzle)
         }
 
         function create() {
             // ô vuông
             for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
                 for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
-                    if (!COLLISION[i][j]) {
+                    if ( !COLLISION[i][j]) {
                         let square =
                             this.add.image(
                                 j * CELL_SIZE + 20,
@@ -124,6 +135,7 @@
                 }
 
             }
+
             this.add.text(1, 60, 'Cửa vào', { fontSize: '15px', fill: '#aaa' });
             this.add.text(445, 605, 'Cửa ra', { fontSize: '20px', fill: '#aaa' });
             this.add.text(300, 50, `Đợt ${wave.id}`, { fontSize: '20px', fill: '#aaa' });
@@ -165,18 +177,75 @@
         }
 
         function monsterRespawn(number) {
-            for (let i = 0; i < 15; i++) {
+            let monsterType = ["flying", "landing"];
+
+            for (let i = 0; i < number; i++) {
                 this.time.addEvent({
                     delay: i * 650, callback: () => {
+
                         let monster = this.physics.add.image(20, OFFSET_Y, "bigBee");
+
+                        //monster body shape for collision
+                        monster.setInteractive(new Phaser.Geom.Polygon([
+                            50, 560,
+                            550, 560,
+                            550, 100,
+                            900, 100,
+                            900, 1050,
+                            50, 1050,
+                            50, 560
+                        ]), Phaser.Geom.Polygon.Contains);
+
                         monster.setDisplaySize(40, 40);
-                        monster.setVelocity(80, 80)
                         monster.setDepth(0)
+                        monster.type = "landing"
+                        monster.speed = 100
+                        monster.maxHealth = 1000
+                        monster.health = 800
+
+                        if (monster.type == "flying") {
+                            monster.setVelocity(80, 80)
+                            pathOfMonsters.push([])
+                            monsterVecs.push(null)
+                        }
+
+                        if (monster.type == "landing") {
+                            let path = new Phaser.Curves.Path(monster.x, monster.y);
+
+                            mazePuzzle.forEach(i => {
+                                path.lineTo(CELL_SIZE * i[1] + CELL_SIZE / 2, i[0] * CELL_SIZE + OFFSET_Y)
+                            })
+                            // console.log(path.getLength())
+                            pathOfMonsters.push(path);
+                            let duration = (Math.sqrt(path.getLength() * path.getLength()) / monster.speed) * 1000;
+                            let follower = { t: 0, vec: new Phaser.Math.Vector2() };
+                            let tween = this.tweens.add({
+                                targets: follower,
+                                t: 1,
+                                ease: 'start',
+                                duration: duration, // change
+                                yoyo: false,
+                                repeat: -2
+                            });
+
+
+                            monsterVecs.push(follower)
+                        }
+
+                        this.input.enableDebug(monster, 0xff00ff);
+
+
                         monsters.push(monster)
                     }, callbackScope: this, loop: false
                 });
             }
 
+        }
+
+        function dealDamage(bullet, monster) {
+            console.log("touch monster")
+            bullets.splice(bullets.indexOf(bullet), 1)
+            bullet.destroy();
         }
 
         function shoot(monsters, towers) {
@@ -193,8 +262,6 @@
 
                 })
                 if (count > 0) {
-
-
                     //nạp đạn
                     tower.setTint("0xff00")
                     tower.isReady = false;
@@ -208,12 +275,24 @@
                     //Tạo đạn và bắn
 
                     let bullet = this.physics.add.image(tower.x, tower.y, 'bullet');
+                    bullet.setInteractive(new Phaser.Geom.Circle(
+                        512, 512, 512
+                    ), Phaser.Geom.Circle.Contains);
                     bullet.setTint("0xffffff")
                     bullet.setDisplaySize(30, 30);
                     bullet.speed = 200
                     bullet.setDepth(1)
-                    bullets.push(bullet)
+                    this.input.enableDebug(bullet, 0xff00ff);
 
+                    //Giảm range của collider
+                    bullet.setCircle(45)
+
+                    this.physics.add.overlap(bullet, monsters[0], dealDamage, null, this);
+                    //the same above
+                    // this.physics.add.collider(bullet, monsters[0], null,  () => {
+                    //      dealDamage.call(this, bullet, monsters[0])
+                    // }, this);
+                    bullets.push(bullet)
                 }
 
                 else {
@@ -221,8 +300,11 @@
                 }
             })
         }
+
         function moveTo(source, target, speed) {
-            //angel
+            //use linearInterpolation instead
+
+
             let angle = Math.atan2(Math.abs(target.x - source.x), Math.abs(target.y - source.y));
 
             if (target.x > source.x) {
@@ -240,11 +322,41 @@
             }
 
         }
-        function update() {
+
+        function update(time, delta) {
+
+            graphics.clear();
+
             //end game
             if (life < 1) {
+                this.physics.pause();
                 return
             }
+
+
+            //landing monster move
+            monsters.forEach((monster, index) => {
+                graphics.lineStyle(2, 0xffffff, 1);
+                if (monster.type == "landing") {
+                    
+                    graphics.lineStyle(2, 0xffffff, 1);
+
+                    pathOfMonsters[index].draw(graphics);
+                    // console.log(monsterVecs[index].t)
+
+                    pathOfMonsters[index].getPoint(monsterVecs[index].t, monsterVecs[index].vec);
+                    monster.setPosition(monsterVecs[index].vec.x, monsterVecs[index].vec.y)
+
+                    // health draw
+                    graphics.lineStyle(2, 0xff00, 0.5);
+                    graphics.strokeRoundedRect(monster.x - monster.body.width / 2, monster.y + CELL_SIZE / 2, monster.body.width, CELL_SIZE / 7, 0);
+                    graphics.fillStyle(0x00ff00, 1);
+                    graphics.fillRect(monster.x - monster.body.width / 2, monster.y + CELL_SIZE / 2, monster.body.width * monster.health / monster.maxHealth, CELL_SIZE / 7);
+                    //end health draw
+
+                }
+
+            })
 
             //is buying
             if (isBuying) {
