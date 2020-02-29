@@ -12,6 +12,8 @@
     <!-- <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script> -->
 
     <script src="/js/mazePuzzle.js"></script>
+    <script src="/js/tower.js"></script>
+    <script src="/js/square.js"></script>
 </head>
 
 <body>
@@ -23,9 +25,12 @@
         var graphics;
         var towers = []
 
-        var tower1; //test
-        var temp;
+        var tempTower;
 
+        var sampleTower1;
+        var sampleTower2;
+        var sampleTower3;
+        var sampleTower4;
 
         var bullets = []
         var follower = null;
@@ -66,8 +71,6 @@
         var pathOfMonsters = []
 
         var gold = null;
-        var tower = null;
-
         var goldText = null;
 
         var config = {
@@ -95,14 +98,23 @@
             this.load.image('bigBee', '/img/bigBee.png');
             this.load.image('frozen', '/img/frozen.png');
             this.load.image('arrow', '/img/arrow.png');
-            this.load.image('bullet', '/img/bullet.png');
+
+            this.load.image('upgrade', '/img/loop.png');
+            this.load.spritesheet('sell', '/img/coin.png', { frameWidth: 32, frameHeight: 32 });
+
+            this.load.image('power0', '/img/tower/power/0.png');
+            this.load.image('power1', '/img/tower/power/1.png');
+            this.load.image('power2', '/img/tower/power/2.png');
+            this.load.image('power3', '/img/tower/power/3.png');
+            this.load.image('power4', '/img/tower/power/4.png');
+            this.load.image('power5', '/img/tower/power/5.png');
 
             wave = {
                 id: 1,
                 quantity: 1
             };
 
-            life = 10;
+            life = 100;
             // gold = 250;
             gold = 10000;
 
@@ -113,62 +125,27 @@
         }
 
         function create() {
-            // init square
+
             for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
                 for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
                     if (!COLLISION[i][j]) {
-                        let square =
-                            this.add.image(
-                                j * CELL_SIZE + 20,
-                                i * CELL_SIZE + OFFSET_Y,
-                                "square"
-                            ).setDisplaySize(40, 45);
-
-                        square.posX = j
-                        square.posY = i
-                         
-                        //decide buy
-                        square.setInteractive()
-                        square.on("pointerdown", (pointer) => {
-                            console.log("clicked square")
-                            if (isBuying && gold >= 70) {
-                                //Check isOkPath
-                                // pathOfMonsters.forEach()
-
-                                //if
-                                    //Kiểm tra xây được không
-
-
-                                    //Cập nhật lại đường đi quái vật landing
-                                //end if
-                               
-                                let tower = this.add.image(square.x, square.y, "arrow");
-                                // console.log(square.x, square.y)
-                                tower.setDisplaySize(40, 40)
-                                tower.setDepth(-1)
-                                tower.isReady = true;
-                                tower.range = 80
-                                tower.price = 70
-
-                                gold -= tower.price
-                                goldText.setText(`Vàng: ${gold}`)
-                                // square.disableBody(true, true);
-                                towers.push(tower)
-                            }
-                        })
-
+                        let square = new Square(this, j, i)
                     }
                 }
-
             }
 
-            //end square
+            this.anims.create({
+                key: 'rotate',
+                frames: 'sell',
+                frameRate: 10,
+                repeat: -1
+            });
 
             this.add.text(1, 60, 'Cửa vào', { fontSize: '15px', fill: '#aaa' });
             this.add.text(445, 605, 'Cửa ra', { fontSize: '20px', fill: '#aaa' });
             this.add.text(300, 50, `Đợt ${wave.id}`, { fontSize: '20px', fill: '#aaa' });
-            lifeText = this.add.text(300, 150, `Máu ${life}`, { fontSize: '20px', fill: '#aaa' });
 
+            lifeText = this.add.text(300, 150, `Máu ${life}`, { fontSize: '20px', fill: '#aaa' });
             goldText = this.add.text(560, 180, `Vàng: ${gold}`, { fontSize: '20px', fill: '#aaa' });
 
 
@@ -176,33 +153,40 @@
             this.add.text(560, 200, 'Tháp', { fontSize: '20px', fill: '#aaa' });
             this.add.text(560, 420, 'Skill', { fontSize: '20px', fill: '#aaa' });
 
+            sampleTower1 = new Tower(this, 580, 300, 'power0')
 
-            tower1 = this.add.image(580, 250, "arrow").setDisplaySize(40, 40);
-            tower1.price = 70
-            tower1.setInteractive();
-            this.add.image(580, 300, "arrow").setDisplaySize(40, 40);
-            this.add.image(580, 350, "arrow").setDisplaySize(40, 40);
-            this.add.image(640, 250, "frozen").setDisplaySize(40, 40);
-            this.add.image(640, 300, "frozen").setDisplaySize(40, 40);
-            this.add.image(640, 350, "frozen").setDisplaySize(40, 40);
+            // this.add.image(580, 300, `0.png`).setDisplaySize(40, 40)
+            // this.add.image(580, 350, "arrow").setDisplaySize(40, 40);
+            // this.add.image(640, 250, "frozen").setDisplaySize(40, 40);
+            // this.add.image(640, 300, "frozen").setDisplaySize(40, 40);
+            // this.add.image(640, 350, "frozen").setDisplaySize(40, 40);
 
-            tower1.on("pointerdown", (pointer) => {
-                //tạo tháp từ con trỏ chuột
-                if (gold >= tower1.price) {
-                    if (isBuying) {
-                        temp.destroy();
-                    }
-                    isBuying = true;
-                    temp = this.physics.add.image(pointer.x, pointer.y, "arrow");
-                    temp.setDisplaySize(40, 40)
-                    temp.setAlpha(0.5)
-                    
-                }
-            })
 
             //Wave
             // let monsterRespawnEvent = this.time.addEvent({ delay: 10000, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
             monsterRespawn.call(this, 15)
+
+            //is buying
+            this.input.on("pointermove", (pointer) => {
+                if (isBuying) {
+                    // console.log("buying mouse move")
+                    tempTower.x = pointer.x
+                    tempTower.y = pointer.y
+                }
+            })
+
+            // Huỷ chọn mua tháp khi click ra ngoài
+            this.input.on("pointerdown", (pointer) => {
+                if (
+                    isBuying
+                    &&
+                    pointer.y > GAME_HEIGHT + OFFSET_Y
+                ) {
+                    console.log("clicked everywhere")
+                    isBuying = false;
+                    tempTower.destroy();
+                }
+            })
         }
         function monsterReachEndpoint(tween, target, sprite) {
             life -= 1;
@@ -331,7 +315,7 @@
                     //Giảm range của collider
                     bullet.target = tower.target
                     bullet.setCircle(45)
-                    this.physics.add.overlap(bullet, monsters[0], dealDamage, null, this);
+                    this.physics.add.overlap(bullet, bullet.target, dealDamage, null, this);
 
                     // this.input.enableDebug(bullet, 0xff00ff);
                     bullets.push(bullet)
@@ -345,7 +329,6 @@
 
         function moveTo(source, target, speed) {
             //use linearInterpolation instead
-
 
             let angle = Math.atan2(Math.abs(target.x - source.x), Math.abs(target.y - source.y));
 
@@ -376,6 +359,7 @@
             }
 
 
+
             //landing monster move
             monsters.forEach((monster, index) => {
                 graphics.lineStyle(2, 0xffffff, 1);
@@ -400,25 +384,7 @@
 
             })
 
-            //is buying
-            if (isBuying) {
-                this.input.on("pointermove", (pointer) => {
-                    temp.x = pointer.x
-                    temp.y = pointer.y
-                })
-            }
 
-            // Huỷ chọn mua tháp khi click ra ngoài
-            this.input.on("pointerdown", (pointer) => {
-                if (isBuying
-                    && pointer.y > GAME_HEIGHT + OFFSET_Y
-                    && pointer.y > OFFSET_Y + GAME_HEIGHT
-                ) {
-                    console.log("clicked everywhere")
-                    isBuying = false;
-                    temp.destroy();
-                }
-            })
 
             //Cập nhật đường đạn
             bullets.forEach(bullet => moveTo.call(this, bullet, bullet.target, bullet.speed));
