@@ -52,9 +52,9 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
             this.setCircle(10, 3, 15);
             this.type = 'landing';
-            this.maxHealth = 20;
-            this.health = 20;
-            this.speed = 100;
+            this.maxHealth = 10 + wave*5;
+            this.health = 10 + wave*5;
+            this.speed = 80;
         }
 
         if (this.type == 'flying') {
@@ -154,7 +154,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         }
 
         if (this.getName() == 'ani_beast') {
-            this.price = 5;
+            this.price = 10;
         }
         return this.price;
     }

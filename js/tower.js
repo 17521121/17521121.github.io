@@ -148,6 +148,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     if (this.level == 5) {
                         upgradeImage.setAlpha(0.5);
                     }
+                    // upgradeImage.setCirle(1)
                     upgradeImage.setInteractive();
 
                     upgradeImage.on('pointerdown', pointer => {

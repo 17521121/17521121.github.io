@@ -28,7 +28,6 @@
         var towers = []
 
         var tempTower;
-
         var sampleTower1;
         var sampleTower2;
         var sampleTower3;
@@ -39,7 +38,10 @@
         var isBuying = false;
         var monsterVecs = []
         var lifeText;
-
+        var wave;
+        var waveText;
+        var waveDelay = 15000
+       
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -76,16 +78,16 @@
         var isTowerClicked = false;
         var gold = null;
         var goldText = null;
-
+        var monsterRespawnEvent
         var config = {
             type: Phaser.AUTO,
             width: 700,
             height: 650,
             physics: {
                 default: 'arcade',
-                    // arcade: {
-                    //     debug: true,
-                    // }
+                // arcade: {
+                //     debug: true,
+                // }
             },
             scene: {
                 preload: preload,
@@ -103,11 +105,11 @@
             this.load.image('arrow', '/img/arrow.png');
 
             this.load.image('bullet', '/img/bullet.png');
-            this.load.image('bullet1', '/img/tower/frozen/1.png');
-            this.load.image('bullet2', '/img/tower/frozen/2.png');
-            this.load.image('bullet3', '/img/tower/frozen/3.png');
-            this.load.image('bullet4', '/img/tower/frozen/4.png');
-            this.load.image('bullet5', '/img/tower/frozen/5.png');
+            this.load.image('bullet1', '/img/tower/frozen_bullet/1.png');
+            this.load.image('bullet2', '/img/tower/frozen_bullet/2.png');
+            this.load.image('bullet3', '/img/tower/frozen_bullet/3.png');
+            this.load.image('bullet4', '/img/tower/frozen_bullet/4.png');
+            this.load.image('bullet5', '/img/tower/frozen_bullet/5.png');
 
             this.load.image('upgrade', '/img/loop.png');
             this.load.spritesheet('sell', '/img/coin.png', { frameWidth: 32, frameHeight: 32 });
@@ -116,12 +118,19 @@
 
             this.load.spritesheet('ani_beast', '/img/ani_beast.png', { frameWidth: 32, frameHeight: 53 });
 
-            this.load.image('frozen0', '/img/frozen0.png');
-            this.load.image('frozen1', '/img/frozen0.png');
-            this.load.image('frozen2', '/img/frozen0.png');
-            this.load.image('frozen3', '/img/frozen0.png');
-            this.load.image('frozen4', '/img/frozen0.png');
-            this.load.image('frozen5', '/img/frozen0.png');
+            // this.load.image('frozen0', '/img/frozen0.png');
+            // this.load.image('frozen1', '/img/frozen0.png');
+            // this.load.image('frozen2', '/img/frozen0.png');
+            // this.load.image('frozen3', '/img/frozen0.png');
+            // this.load.image('frozen4', '/img/frozen0.png');
+            // this.load.image('frozen5', '/img/frozen0.png');
+
+            this.load.image('frozen0', '/img/tower/frozen/0.png');
+            this.load.image('frozen1', '/img/tower/frozen/1.png');
+            this.load.image('frozen2', '/img/tower/frozen/2.png');
+            this.load.image('frozen3', '/img/tower/frozen/3.png');
+            this.load.image('frozen4', '/img/tower/frozen/4.png');
+            this.load.image('frozen5', '/img/tower/frozen/5.png');
 
 
             this.load.image('power0', '/img/tower/power/0.png');
@@ -131,23 +140,20 @@
             this.load.image('power4', '/img/tower/power/4.png');
             this.load.image('power5', '/img/tower/power/5.png');
 
-            wave = {
-                id: 1,
-                quantity: 1
-            };
+            wave = 1
 
             life = 10;
-            gold = 250;
+            gold = 400;
             graphics = this.add.graphics();
             mazePuzzle = findWay(COLLISION, START_POS, END_POS);
-            
+
         }
 
         function create() {
 
-            let background = this.add.image(5, 5+ OFFSET_Y - CELL_SIZE/2, "background").setOrigin(0)
+            let background = this.add.image(0, OFFSET_Y - CELL_SIZE / 2, "background").setOrigin(0)
             background.setDepth(-3)
-            background.setDisplaySize(GAME_WIDTH,  GAME_HEIGHT)
+            background.setDisplaySize(GAME_WIDTH + 10, GAME_HEIGHT + 15)
             for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
                 for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
                     if (!COLLISION[i][j]) {
@@ -172,9 +178,9 @@
 
             this.add.text(1, 60, 'Cửa vào', { fontSize: '15px', fill: '#aaa' });
             this.add.text(445, 605, 'Cửa ra', { fontSize: '20px', fill: '#aaa' });
-            this.add.text(300, 50, `Đợt ${wave.id}`, { fontSize: '20px', fill: '#aaa' });
+            waveText = this.add.text(300, 50, `Đợt ${wave}`, { fontSize: '20px', fill: '#aaa' });
 
-            lifeText = this.add.text(300, 150, `Máu ${life}`, { fontSize: '20px', fill: '#aaa' });
+            lifeText = this.add.text(560, 150, `Máu ${life}`, { fontSize: '20px', fill: '#aaa' });
             goldText = this.add.text(560, 180, `Vàng: ${gold}`, { fontSize: '20px', fill: '#aaa' });
 
 
@@ -183,7 +189,7 @@
             this.add.text(560, 420, 'Skill', { fontSize: '20px', fill: '#aaa' });
 
             sampleTower1 = new Tower(this, 580, 340, 'frozen0')
-            sampleTower2 = new Tower(this, 640, 340, 'power0')
+            // sampleTower2 = new Tower(this, 640, 340, 'power0')
 
 
             // this.add.image(580, 300, `0.png`).setDisplaySize(40, 40)
@@ -194,7 +200,8 @@
 
 
             //Wave
-            let monsterRespawnEvent = this.time.addEvent({ delay: 10000, callback: () => monsterRespawn.call(this, 5), callbackScope: this, loop: true });
+            monsterRespawnEvent = this.time.addEvent({ delay: waveDelay, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
+            waveText = this.add.text(10, 20, `Đợt kế: ${monsterRespawnEvent.getProgress().toString()}`)
             // monsterRespawn.call(this, 15)
 
             //is buying
@@ -249,7 +256,8 @@
         }
 
         function monsterRespawn(number) {
-
+            wave += 1;
+            waveText.setText(`Đợt: ${wave}`)
             for (let i = 0; i < number; i++) {
                 this.time.addEvent({
                     delay: i * 650, callback: () => {
@@ -296,12 +304,15 @@
         function update(time, delta) {
 
             graphics.clear();
+            waveText.setText('Đợt kế: ' + (waveDelay - waveDelay*parseFloat(monsterRespawnEvent.getProgress().toString().substr(0, 4)))/1000);
 
-            //end game
+            //end game/ 1000
             if (life < 1) {
                 this.physics.pause();
                 return
             }
+
+
 
             //landing monster move
             monsters.forEach((monster, index) => {
