@@ -83,22 +83,32 @@
         function preload() {
             this.load.image('atari1', '/img/bullet.png');
             this.load.image('bigBee', '/img/bigBee.png');
+            this.load.spritesheet('ani_beast', '/img/ani_beast.png', { frameWidth: 32, frameHeight: 53 });
             this.load.image('square', '/img/square1.png');
         }
 
         function create() {
 
-            for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
-                for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
-                    let square =
-                        this.add.image(
-                            j * CELL_SIZE + 20,
-                            i * CELL_SIZE + OFFSET_Y,
-                            "square"
-                        ).setDisplaySize(40, 45);
-                }
+            // this.anims.create({
+            //     key: 'run',
+            //     frames: 'ani_beast',
+            //     frameRate: 10,
+            //     repeat: -1
+            // });
 
-            }
+          
+
+            // this.anims.create({
+            //     key: 'turn',
+            //     frames: [{ key: 'dude', frame: 4 }],
+            //     frameRate: 20
+            // });
+
+            
+
+
+            let monster = this.physics.add.sprite(20, 100, "ani_beast")
+            monster.anims.play('left', true);
 
         }
 

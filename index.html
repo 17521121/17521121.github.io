@@ -14,6 +14,8 @@
     <script src="/js/mazePuzzle.js"></script>
     <script src="/js/tower.js"></script>
     <script src="/js/square.js"></script>
+    <script src="/js/monster.js"></script>
+    <script src="/js/bullet.js"></script>
 </head>
 
 <body>
@@ -81,7 +83,6 @@
                 default: 'arcade',
                 arcade: {
                     debug: true,
-
                 }
             },
             scene: {
@@ -99,8 +100,17 @@
             this.load.image('frozen', '/img/frozen.png');
             this.load.image('arrow', '/img/arrow.png');
 
+            this.load.image('bullet', '/img/bullet.png');
+            this.load.image('bullet1', '/img/tower/frozen/1.png');
+            this.load.image('bullet2', '/img/tower/frozen/2.png');
+            this.load.image('bullet3', '/img/tower/frozen/3.png');
+            this.load.image('bullet4', '/img/tower/frozen/4.png');
+            this.load.image('bullet5', '/img/tower/frozen/5.png');
+
             this.load.image('upgrade', '/img/loop.png');
             this.load.spritesheet('sell', '/img/coin.png', { frameWidth: 32, frameHeight: 32 });
+
+            this.load.spritesheet('ani_beast', '/img/ani_beast.png', { frameWidth: 32, frameHeight: 53 });
 
             this.load.image('power0', '/img/tower/power/0.png');
             this.load.image('power1', '/img/tower/power/1.png');
@@ -115,13 +125,9 @@
             };
 
             life = 100;
-            // gold = 250;
             gold = 10000;
-
             graphics = this.add.graphics();
-
             mazePuzzle = findWay(COLLISION, START_POS, END_POS);
-            // console.log(mazePuzzle)
         }
 
         function create() {
@@ -137,6 +143,13 @@
             this.anims.create({
                 key: 'rotate',
                 frames: 'sell',
+                frameRate: 10,
+                repeat: -1
+            });
+
+            this.anims.create({
+                key: 'run',
+                frames: 'ani_beast',
                 frameRate: 10,
                 repeat: -1
             });
@@ -188,72 +201,40 @@
                 }
             })
         }
-        function monsterReachEndpoint(tween, target, sprite) {
+
+        function monsterReachEndpoint(tween, targets, sprite) {
             life -= 1;
             lifeText.setText(`Máu: ${life}`)
+            // tween.stop();
+            let index = monsterVecs.indexOf(targets[0]);
+            monsterVecs.splice(index, 1)
+            monsters.splice(index, 1)
+            pathOfMonsters.splice(index, 1)
+            sprite.destroy();
         }
 
         function monsterRespawn(number) {
-            let monsterType = ["flying", "landing"];
 
             for (let i = 0; i < number; i++) {
                 this.time.addEvent({
                     delay: i * 650, callback: () => {
 
-                        let monster = this.physics.add.image(20, OFFSET_Y, "bigBee");
+                        let monster = new Monster(this, 0, 0, "ani_beast")
 
                         //monster body shape for collision
-                        monster.setInteractive(new Phaser.Geom.Polygon([
-                            50, 560,
-                            550, 560,
-                            550, 100,
-                            900, 100,
-                            900, 1050,
-                            50, 1050,
-                            50, 560
-                        ]), Phaser.Geom.Polygon.Contains);
+                        // monster.setInteractive(new Phaser.Geom.Polygon([
+                        //     50, 560,
+                        //     550, 560,
+                        //     550, 100,
+                        //     900, 100,
+                        //     900, 1050,
+                        //     50, 1050,
+                        //     50, 560
+                        // ]), Phaser.Geom.Polygon.Contains);
 
-                        monster.setDisplaySize(40, 40);
-                        monster.setDepth(0)
-                        monster.type = "landing"
-                        monster.speed = 100
-                        monster.maxHealth = 1000
-                        monster.health = 800
-
-                        if (monster.type == "flying") {
-                            monster.setVelocity(80, 80)
-                            pathOfMonsters.push([])
-                            monsterVecs.push(null)
-                        }
-
-                        if (monster.type == "landing") {
-                            let path = new Phaser.Curves.Path(monster.x, monster.y);
-
-                            mazePuzzle.forEach(i => {
-                                path.lineTo(CELL_SIZE * i[1] + CELL_SIZE / 2, i[0] * CELL_SIZE + OFFSET_Y)
-                            })
-                            // console.log(path.getLength())
-                            pathOfMonsters.push(path);
-                            let duration = (Math.sqrt(path.getLength() * path.getLength()) / monster.speed) * 1000;
-                            let follower = { t: 0, vec: new Phaser.Math.Vector2() };
-                            let tween = this.tweens.add({
-                                targets: follower,
-                                t: 1,
-                                ease: 'start',
-                                duration: duration, // change
-                                yoyo: false,
-                                repeat: -2,
-                                onComplete: monsterReachEndpoint,
-                            });
-
-
-                            monsterVecs.push(follower)
-                        }
-
-                        this.input.enableDebug(monster, 0xff00ff);
-
-
+                        // this.input.enableDebug(monster, 0xff00);
                         monsters.push(monster)
+
                     }, callbackScope: this, loop: false
                 });
             }
@@ -304,17 +285,11 @@
 
                     //Tạo đạn và bắn
 
-                    let bullet = this.physics.add.image(tower.x, tower.y, 'bullet');
-                    bullet.setInteractive(new Phaser.Geom.Circle(
-                        512, 512, 512
-                    ), Phaser.Geom.Circle.Contains);
-                    bullet.setTint("0xffffff")
-                    bullet.setDisplaySize(30, 30);
-                    bullet.speed = 200
-                    bullet.setDepth(1)
-                    //Giảm range của collider
+                    let bullet = new Bullet(this, tower.x, tower.y , "bullet", 1)
+
+                    // let bullet = this.physics.add.image(tower.x, tower.y, 'bullet');
+                    
                     bullet.target = tower.target
-                    bullet.setCircle(45)
                     this.physics.add.overlap(bullet, bullet.target, dealDamage, null, this);
 
                     // this.input.enableDebug(bullet, 0xff00ff);
@@ -375,20 +350,17 @@
 
                     // health draw
                     graphics.lineStyle(2, 0xff00, 0.5);
-                    graphics.strokeRoundedRect(monster.x - monster.body.width / 2, monster.y + CELL_SIZE / 2, monster.body.width, CELL_SIZE / 7, 0);
+                    graphics.strokeRoundedRect(monster.x - monster.width / 2, monster.y + CELL_SIZE / 2, monster.width, CELL_SIZE / 7, 0);
                     graphics.fillStyle(0x00ff00, 1);
-                    graphics.fillRect(monster.x - monster.body.width / 2, monster.y + CELL_SIZE / 2, monster.body.width * monster.health / monster.maxHealth, CELL_SIZE / 7);
+                    graphics.fillRect(monster.x - monster.width / 2, monster.y + CELL_SIZE / 2, monster.width * monster.health / monster.maxHealth, CELL_SIZE / 7);
                     //end health draw
 
                 }
 
             })
 
-
-
             //Cập nhật đường đạn
             bullets.forEach(bullet => moveTo.call(this, bullet, bullet.target, bullet.speed));
-
 
             //fire
             shoot.call(this, monsters, towers)

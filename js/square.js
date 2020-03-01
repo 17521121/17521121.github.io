@@ -1,10 +1,10 @@
-class Square extends Phaser.GameObjects.Image {
+class Square extends Phaser.Physics.Arcade.Sprite {
     //Type : range, melee, sample
     //name: power arrow frozen thunder
     constructor(scene, x, y) {
         super(scene, x * CELL_SIZE + 20, y * CELL_SIZE + OFFSET_Y, `square`);
         scene.add.existing(this);
-
+        scene.physics.add.existing(this)
         this.Phaserscene = scene;
         this.setDisplaySize(40, 45);
         this.setInteractive();
@@ -16,6 +16,7 @@ class Square extends Phaser.GameObjects.Image {
 
     init() {
         //decide buy
+        
         this.on('pointerdown', pointer => {
             console.log('clicked square');
             if (isBuying && gold >= 70) {
@@ -35,6 +36,7 @@ class Square extends Phaser.GameObjects.Image {
                     tempTower.getNextLevelName(),
                     1
                 );
+
 
                 gold -= tower.getPrice();
                 goldText.setText(`Vàng: ${gold}`);
