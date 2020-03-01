@@ -83,9 +83,9 @@
             height: 650,
             physics: {
                 default: 'arcade',
-                arcade: {
-                    debug: true,
-                }
+                    // arcade: {
+                    //     debug: true,
+                    // }
             },
             scene: {
                 preload: preload,
@@ -97,7 +97,8 @@
         var game = new Phaser.Game(config);
 
         function preload() {
-            this.load.image('square', '/img/square1.png');
+            this.load.image('background', '/img/background.png');
+            this.load.image('square', '/img/square2.png');
             this.load.image('bigBee', '/img/bigBee.png');
             this.load.image('arrow', '/img/arrow.png');
 
@@ -110,6 +111,8 @@
 
             this.load.image('upgrade', '/img/loop.png');
             this.load.spritesheet('sell', '/img/coin.png', { frameWidth: 32, frameHeight: 32 });
+
+            this.load.spritesheet('onDead', '/img/explosion.png', { frameWidth: 64, frameHeight: 64 });
 
             this.load.spritesheet('ani_beast', '/img/ani_beast.png', { frameWidth: 32, frameHeight: 53 });
 
@@ -133,14 +136,18 @@
                 quantity: 1
             };
 
-            life = 100;
-            gold = 10000;
+            life = 10;
+            gold = 250;
             graphics = this.add.graphics();
             mazePuzzle = findWay(COLLISION, START_POS, END_POS);
+            
         }
 
         function create() {
 
+            let background = this.add.image(5, 5+ OFFSET_Y - CELL_SIZE/2, "background").setOrigin(0)
+            background.setDepth(-3)
+            background.setDisplaySize(GAME_WIDTH,  GAME_HEIGHT)
             for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
                 for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
                     if (!COLLISION[i][j]) {
@@ -187,13 +194,12 @@
 
 
             //Wave
-            // let monsterRespawnEvent = this.time.addEvent({ delay: 2000, callback: () => monsterRespawn.call(this, 5), callbackScope: this, loop: true });
-            monsterRespawn.call(this, 15)
+            let monsterRespawnEvent = this.time.addEvent({ delay: 10000, callback: () => monsterRespawn.call(this, 5), callbackScope: this, loop: true });
+            // monsterRespawn.call(this, 15)
 
             //is buying
             this.input.on("pointermove", (pointer) => {
                 if (isBuying) {
-                    // console.log("buying mouse move")
                     tempTower.x = pointer.x
                     tempTower.y = pointer.y
                 }
@@ -203,12 +209,13 @@
             this.input.on("pointerdown", (pointer) => {
                 if (
                     (isBuying || isTowerClicked)
-                    &&
-                    pointer.y > GAME_HEIGHT + OFFSET_Y
                 ) {
                     console.log("clicked everywhere")
                     isBuying = false;
-                    tempTower.destroy();
+                    if (tempTower) {
+                        tempTower.destroy();
+
+                    }
                     if (upgradeImage) {
                         upgradeImage.destroy()
                     }
@@ -219,6 +226,7 @@
                 }
             })
         }
+
 
         function monsterReachEndpoint(tween, targets, monster) {
             life -= 1;
@@ -235,7 +243,6 @@
                 i--;
             }
 
-
             monsters.splice(index, 1)
             pathOfMonsters.splice(index, 1)
             monster.destroy();
@@ -247,18 +254,6 @@
                 this.time.addEvent({
                     delay: i * 650, callback: () => {
                         let monster = new Monster(this, 0, 0, "ani_beast")
-                        //monster body shape for collision
-                        // monster.setInteractive(new Phaser.Geom.Polygon([
-                        //     50, 560,
-                        //     550, 560,
-                        //     550, 100,
-                        //     900, 100,
-                        //     900, 1050,
-                        //     50, 1050,
-                        //     50, 560
-                        // ]), Phaser.Geom.Polygon.Contains);
-
-                        // this.input.enableDebug(monster, 0xff00);
                         monsters.push(monster)
 
                     }, callbackScope: this, loop: false
@@ -269,8 +264,15 @@
 
         function dealDamage(bullet, monster) {
             console.log("touch monster")
+            monster.health -= bullet.damage
+
+            if (monster.health <= 0) {
+                monster.dead();
+            }
+
             bullets.splice(bullets.indexOf(bullet), 1)
             bullet.destroy();
+
         }
 
         function getDistance(objectA, objectB) {
@@ -306,7 +308,7 @@
                 graphics.lineStyle(2, 0xffffff, 1);
                 if (monster.type == "landing") {
                     graphics.lineStyle(2, 0xffffff, 1);
-                    pathOfMonsters[index].draw(graphics);
+                    // pathOfMonsters[index].draw(graphics);
                     pathOfMonsters[index].getPoint(monsterVecs[index].t, monsterVecs[index].vec);
                     monster.setPosWithHealth(monsterVecs[index].vec.x, monsterVecs[index].vec.y);
                 }

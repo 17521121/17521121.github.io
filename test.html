@@ -4,44 +4,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test</title>
+    <title>Sinh tử môn</title>
 
     <link rel="stylesheet" href="/css/style.css">
     <!-- <script src="https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script> -->
+
+    <script src="/js/mazePuzzle.js"></script>
+    <script src="/js/tower.js"></script>
+    <script src="/js/square.js"></script>
+    <script src="/js/monster.js"></script>
+    <script src="/js/bullet.js"></script>
 </head>
 
 <body>
+
     <script>
+
         var mazePuzzle;
 
         var graphics;
         var towers = []
-        var tower1; //test
-        var temp;
+
+        var tempTower;
+
+        var sampleTower1;
+        var sampleTower2;
+        var sampleTower3;
+        var sampleTower4;
+
         var bullets = []
         var follower = null;
         var isBuying = false;
         var monsterVecs = []
-        var range = 80
+        var lifeText;
+
         var COLLISION = [
-            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1]
         ];
 
         var START_POS = [0, 0];
-        var END_POS = [12, 12];
+        var END_POS = [13, 12];
+
 
         var OFFSET_Y = 100;
         var OFFSET_RIGHT_X = 180;
@@ -53,10 +71,10 @@
 
         var monsters = [];
         var pathOfMonsters = []
-
+        var sellImage;
+        var upgradeImage;
+        var isTowerClicked = false;
         var gold = null;
-        var tower = null;
-
         var goldText = null;
 
         var config = {
@@ -67,7 +85,6 @@
                 default: 'arcade',
                 arcade: {
                     debug: true,
-
                 }
             },
             scene: {
@@ -79,15 +96,68 @@
 
         var game = new Phaser.Game(config);
 
-
         function preload() {
-            this.load.image('atari1', '/img/bullet.png');
-            this.load.image('bigBee', '/img/bigBee.png');
-            this.load.spritesheet('ani_beast', '/img/ani_beast.png', { frameWidth: 32, frameHeight: 53 });
             this.load.image('square', '/img/square1.png');
+            this.load.image('bigBee', '/img/bigBee.png');
+            this.load.image('arrow', '/img/arrow.png');
+
+            this.load.image('bullet', '/img/bullet.png');
+            this.load.image('bullet1', '/img/tower/frozen/1.png');
+            this.load.image('bullet2', '/img/tower/frozen/2.png');
+            this.load.image('bullet3', '/img/tower/frozen/3.png');
+            this.load.image('bullet4', '/img/tower/frozen/4.png');
+            this.load.image('bullet5', '/img/tower/frozen/5.png');
+
+            this.load.image('upgrade', '/img/loop.png');
+            this.load.spritesheet('sell', '/img/coin.png', { frameWidth: 32, frameHeight: 32 });
+
+            this.load.spritesheet('onDead', '/img/explosion.png', { frameWidth: 64, frameHeight: 64 });
+
+            this.load.spritesheet('ani_beast', '/img/ani_beast.png', { frameWidth: 32, frameHeight: 53 });
+
+            this.load.image('frozen0', '/img/frozen0.png');
+            this.load.image('frozen1', '/img/frozen0.png');
+            this.load.image('frozen2', '/img/frozen0.png');
+            this.load.image('frozen3', '/img/frozen0.png');
+            this.load.image('frozen4', '/img/frozen0.png');
+            this.load.image('frozen5', '/img/frozen0.png');
+
+
+            this.load.image('power0', '/img/tower/power/0.png');
+            this.load.image('power1', '/img/tower/power/1.png');
+            this.load.image('power2', '/img/tower/power/2.png');
+            this.load.image('power3', '/img/tower/power/3.png');
+            this.load.image('power4', '/img/tower/power/4.png');
+            this.load.image('power5', '/img/tower/power/5.png');
+
+            wave = {
+                id: 1,
+                quantity: 1
+            };
+
+            life = 100;
+            gold = 10000;
+            graphics = this.add.graphics();
+            mazePuzzle = findWay(COLLISION, START_POS, END_POS);
+            
         }
 
         function create() {
+
+            for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
+                for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
+                    if (!COLLISION[i][j]) {
+                        let square = new Square(this, j, i)
+                    }
+                }
+            }
+
+            this.anims.create({
+                key: 'rotate',
+                frames: 'sell',
+                frameRate: 10,
+                repeat: -1
+            });
 
             this.anims.create({
                 key: 'run',
@@ -96,26 +166,157 @@
                 repeat: -1
             });
 
-          
+            this.add.text(1, 60, 'Cửa vào', { fontSize: '15px', fill: '#aaa' });
+            this.add.text(445, 605, 'Cửa ra', { fontSize: '20px', fill: '#aaa' });
+            this.add.text(300, 50, `Đợt ${wave.id}`, { fontSize: '20px', fill: '#aaa' });
 
-            // this.anims.create({
-            //     key: 'turn',
-            //     frames: [{ key: 'dude', frame: 4 }],
-            //     frameRate: 20
-            // });
-
-            
+            lifeText = this.add.text(300, 150, `Máu ${life}`, { fontSize: '20px', fill: '#aaa' });
+            goldText = this.add.text(560, 180, `Vàng: ${gold}`, { fontSize: '20px', fill: '#aaa' });
 
 
-            let monster = this.physics.add.sprite(20, 100, "ani_beast")
-            monster.anims.play('run', true);
+            // tháp mẫu
+            this.add.text(560, 200, 'Tháp', { fontSize: '20px', fill: '#aaa' });
+            this.add.text(560, 420, 'Skill', { fontSize: '20px', fill: '#aaa' });
+
+            sampleTower1 = new Tower(this, 580, 340, 'frozen0')
+            sampleTower2 = new Tower(this, 640, 340, 'power0')
+
+
+            // this.add.image(580, 300, `0.png`).setDisplaySize(40, 40)
+            // this.add.image(580, 350, "arrow").setDisplaySize(40, 40);
+            // this.add.image(640, 250, "frozen").setDisplaySize(40, 40);
+            // this.add.image(640, 300, "frozen").setDisplaySize(40, 40);
+            // this.add.image(640, 350, "frozen").setDisplaySize(40, 40);
+
+
+            //Wave
+            // let monsterRespawnEvent = this.time.addEvent({ delay: 2000, callback: () => monsterRespawn.call(this, 5), callbackScope: this, loop: true });
+            monsterRespawn.call(this, 15)
+
+            //is buying
+            this.input.on("pointermove", (pointer) => {
+                if (isBuying) {
+                    tempTower.x = pointer.x
+                    tempTower.y = pointer.y
+                }
+            })
+
+            // Huỷ chọn mua tháp khi click ra ngoài
+            this.input.on("pointerdown", (pointer) => {
+                if (
+                    (isBuying || isTowerClicked)
+                ) {
+                    console.log("clicked everywhere")
+                    isBuying = false;
+                    if (tempTower) {
+                        tempTower.destroy();
+
+                    }
+                    if (upgradeImage) {
+                        upgradeImage.destroy()
+                    }
+                    if (sellImage) {
+                        sellImage.destroy();
+                    }
+                    isTowerClicked = false;
+                }
+            })
+        }
+
+
+        function monsterReachEndpoint(tween, targets, monster) {
+            life -= 1;
+            lifeText.setText(`Máu: ${life}`)
+            let index = monsterVecs.indexOf(targets[0]);
+            monsterVecs.splice(index, 1)
+
+            let i = bullets.length - 1
+            while (i >= 0) {
+                if (bullets[i].target === monster) {
+                    bullets[i].destroy();
+                    bullets.splice(i, 1)
+                }
+                i--;
+            }
+
+            monsters.splice(index, 1)
+            pathOfMonsters.splice(index, 1)
+            monster.destroy();
+        }
+
+        function monsterRespawn(number) {
+
+            for (let i = 0; i < number; i++) {
+                this.time.addEvent({
+                    delay: i * 650, callback: () => {
+                        let monster = new Monster(this, 0, 0, "ani_beast")
+                        monsters.push(monster)
+
+                    }, callbackScope: this, loop: false
+                });
+            }
 
         }
 
-        function update() {
+        function dealDamage(bullet, monster) {
+            console.log("touch monster")
+            monster.health -= bullet.damage
+
+            if (monster.health <= 0) {
+                monster.dead();
+            }
+
+            bullets.splice(bullets.indexOf(bullet), 1)
+            bullet.destroy();
 
         }
 
+        function getDistance(objectA, objectB) {
+            return Math.sqrt(
+                (objectA.x - objectB.x) * (objectA.x - objectB.x)
+                +
+                (objectA.y - objectB.y) * (objectA.y - objectB.y)
+            )
+        }
+
+
+        function moveTo(source, target, speed) {
+            //rad
+            let angle = Math.atan2(target.x - source.x, target.y - source.y);
+
+            source.setAngle(Phaser.Math.RAD_TO_DEG * Phaser.Math.Angle.Between(source.x, source.y, target.x, target.y));
+            source.setVelocity(Math.sin(angle) * speed, Math.cos(angle) * speed)
+
+        }
+
+        function update(time, delta) {
+
+            graphics.clear();
+
+            //end game
+            if (life < 1) {
+                this.physics.pause();
+                return
+            }
+
+            //landing monster move
+            monsters.forEach((monster, index) => {
+                graphics.lineStyle(2, 0xffffff, 1);
+                if (monster.type == "landing") {
+                    graphics.lineStyle(2, 0xffffff, 1);
+                    pathOfMonsters[index].draw(graphics);
+                    pathOfMonsters[index].getPoint(monsterVecs[index].t, monsterVecs[index].vec);
+                    monster.setPosWithHealth(monsterVecs[index].vec.x, monsterVecs[index].vec.y);
+                }
+            })
+
+            //Cập nhật đường đạn
+            bullets.forEach(bullet => moveTo.call(this, bullet, bullet.target, bullet.speed));
+
+            //fire
+            towers.forEach(tower => tower.shoot())
+
+        }
     </script>
 </body>
 

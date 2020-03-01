@@ -14,7 +14,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         this.recharge;
 
         this.setDisplaySize(40, 40);
-        this.setDepth(-1);
+        this.setDepth(1);
         this.setInteractive();
 
         this.posX = (this.x - CELL_SIZE / 2) / CELL_SIZE;
@@ -82,7 +82,8 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
 
     init() {
         this.price = this.getPrice();
-        this.range = 1000;
+        this.range = this.getRange();
+
         //buy sample tower
         if (this.getName().substr(-1) == '0') {
             this.on('pointerdown', pointer => {
@@ -92,7 +93,16 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     if (isBuying) {
                         tempTower.destroy();
                     }
-                    isBuying = true;
+
+                    isBuying = false;
+                    this.Phaserscene.time.addEvent({
+                        delay: 100,
+                        callback: () => {
+                            isBuying = true;
+                        },
+                        callbackScope: this,
+                        loop: false
+                    });
 
                     tempTower = new Tower(
                         this.Phaserscene,
@@ -103,6 +113,8 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         false
                     );
 
+                    tempTower.setDepth(-1);
+
                     tempTower.setAlpha(0.5);
                 }
             });
@@ -111,9 +123,23 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         //upgrade
         else {
             this.on('pointerdown', pointer => {
-                if (!isBuying && !isTowerClicked) {
+                if (!isBuying) {
                     console.log('tower clicked');
-                    isTowerClicked = true;
+                    if(isTowerClicked) {
+                        upgradeImage.destroy();
+                        sellImage.destroy();
+                    }
+                    isTowerClicked = false;
+                    this.Phaserscene.time.addEvent({
+                        delay: 100,
+                        callback: () => {
+                            isTowerClicked = true;
+                        },
+                        callbackScope: this,
+                        loop: false
+                    });
+
+                    
                     upgradeImage = this.Phaserscene.add.image(
                         this.x + CELL_SIZE / 2,
                         this.y - CELL_SIZE / 2,
@@ -125,6 +151,9 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     upgradeImage.setInteractive();
 
                     upgradeImage.on('pointerdown', pointer => {
+                        if(gold < this.getUpgradeCost()) {
+                            return
+                        }
                         console.log('upgrade clicked');
 
                         if (this.level == 5) {
@@ -143,7 +172,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                             this.getNextLevelName(),
                             this.level + 1
                         );
-                        
+
                         isTowerClicked = false;
                         towers.push(tower);
                         upgradeImage.destroy();
@@ -166,7 +195,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         gold += this.getPrice();
                         goldText.setText(`Vàng: ${gold}`);
                         towers.splice(towers.indexOf(this), 1);
-                    
+
                         let square = new Square(
                             this.Phaserscene,
                             this.posX,
@@ -217,38 +246,42 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
             this.range = 30;
         }
         this.range += CELL_SIZE;
-        return this.range
+        return this.range;
     }
 
     getCharge() {
         if (this.getName() == 'frozen1') {
-            return 1000
+            return 1000;
         } else if (this.getName() == 'frozen2') {
-            return 900
+            return 900;
         } else if (this.getName() == 'frozen3') {
-            return 800
+            return 800;
         } else if (this.getName() == 'frozen4') {
-            return 600
+            return 600;
         } else if (this.getName() == 'frozen5') {
-            return 300 
+            return 300;
         }
     }
 
     getBulletName() {
         if (this.getName() == 'frozen1') {
-            return "bullet1"
+            return 'bullet1';
         } else if (this.getName() == 'frozen2') {
-            return "bullet2"
+            return 'bullet2';
         } else if (this.getName() == 'frozen3') {
-            return "bullet3"
+            return 'bullet3';
         } else if (this.getName() == 'frozen4') {
-            return "bullet4"
+            return 'bullet4';
         } else if (this.getName() == 'frozen5') {
-            return "bullet5"
+            return 'bullet5';
         }
     }
 
     shoot() {
+        if (this.getName().slice(0, -1) == 'power') {
+            return;
+        }
+
         let minDistance = this.range;
 
         monsters.forEach(monster => {
@@ -279,10 +312,16 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
 
             //Tạo đạn và bắn
 
-            let bullet = new Bullet(this.Phaserscene, this.x, this.y, this.getBulletName(), this.level);
+            let bullet = new Bullet(
+                this.Phaserscene,
+                this.x,
+                this.y,
+                this.getBulletName(),
+                this.level
+            );
             bullet.target = this.target;
             this.target.aimed.push(bullet);
- 
+
             this.Phaserscene.physics.add.overlap(
                 bullet,
                 bullet.target,
@@ -291,9 +330,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                 this.Phaserscene
             );
 
-            
             bullets.push(bullet);
-            
         }
     }
 }
