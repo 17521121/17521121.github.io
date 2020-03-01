@@ -89,12 +89,12 @@
 
         function create() {
 
-            // this.anims.create({
-            //     key: 'run',
-            //     frames: 'ani_beast',
-            //     frameRate: 10,
-            //     repeat: -1
-            // });
+            this.anims.create({
+                key: 'run',
+                frames: 'ani_beast',
+                frameRate: 10,
+                repeat: -1
+            });
 
           
 
@@ -108,7 +108,7 @@
 
 
             let monster = this.physics.add.sprite(20, 100, "ani_beast")
-            monster.anims.play('left', true);
+            monster.anims.play('run', true);
 
         }
 

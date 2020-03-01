@@ -37,7 +37,6 @@ class Square extends Phaser.Physics.Arcade.Sprite {
                     1
                 );
 
-
                 gold -= tower.getPrice();
                 goldText.setText(`Vàng: ${gold}`);
 

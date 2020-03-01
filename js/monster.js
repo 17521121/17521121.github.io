@@ -18,7 +18,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         this.speed;
         this.maxHealth;
         this.health;
-
+        this.aimed = []
         this.posX = x;
         this.posY = y;
         this.init();
@@ -48,6 +48,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
             this.anims.play('right', true);
 
+            this.setCircle(10, 3 , 15)
             this.type = 'landing';
             this.maxHealth = 1000;
             this.health = 1000;
@@ -55,7 +56,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         }
 
         if (this.type == 'flying') {
-            // console.log(this)
+           
             this.setVelocity(80, 80);
             pathOfMonsters.push([]);
             monsterVecs.push(null);
@@ -70,7 +71,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
                     i[0] * CELL_SIZE + OFFSET_Y
                 );
             });
-            // console.log(path.getLength())
+           
             pathOfMonsters.push(path);
             let duration =
                 (Math.sqrt(path.getLength() * path.getLength()) / this.speed) *
@@ -92,6 +93,18 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
             monsterVecs.push(follower);
         }
     }
+
+
+    setPosWithHealth(posX, posY) {
+        this.setPosition(posX, posY)
+
+        // health draw
+        graphics.lineStyle(2, 0xff00, 0.5);
+        graphics.strokeRoundedRect(this.x - this.width / 2, this.y + CELL_SIZE / 2, this.width, CELL_SIZE / 7, 0);
+        graphics.fillStyle(0x00ff00, 1);
+        graphics.fillRect(this.x - this.width / 2, this.y + CELL_SIZE / 2, this.width * this.health / this.maxHealth, CELL_SIZE / 7);
+        //end health draw
+    } 
 
     getPrice() {
         //dead price

@@ -4,13 +4,14 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, name, level = 0, isInit = true) {
         super(scene, x, y, `${name}`);
         scene.add.existing(this);
-        scene.physics.add.existing(this)
+        scene.physics.add.existing(this);
         this.Phaserscene = scene;
 
         this.level = level;
         this.isReady = true;
-        this.range = 800;
+        this.range;
         this.price;
+        this.recharge;
 
         this.setDisplaySize(40, 40);
         this.setDepth(-1);
@@ -33,7 +34,16 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         } else if (this.getName() == 'power4') {
             return 400;
         }
-        return this.price;
+
+        if (this.getName() == 'frozen1') {
+            return 120;
+        } else if (this.getName() == 'frozen2') {
+            return 180;
+        } else if (this.getName() == 'frozen3') {
+            return 240;
+        } else if (this.getName() == 'frozen4') {
+            return 320;
+        }
     }
 
     getPrice() {
@@ -51,16 +61,34 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         } else if (this.getName() == 'power5') {
             this.price = 320;
         }
+
+        //Sell price
+        if (this.getName() == 'frozen0') {
+            this.price = 80;
+        } else if (this.getName() == 'frozen1') {
+            this.price = 40;
+        } else if (this.getName() == 'frozen2') {
+            this.price = 110;
+        } else if (this.getName() == 'frozen3') {
+            this.price = 150;
+        } else if (this.getName() == 'frozen4') {
+            this.price = 170;
+        } else if (this.getName() == 'frozen5') {
+            this.price = 220;
+        }
+
         return this.price;
     }
 
     init() {
         this.price = this.getPrice();
+        this.range = 1000;
         //buy sample tower
         if (this.getName().substr(-1) == '0') {
             this.on('pointerdown', pointer => {
+                console.log('sampleTower clicked');
                 //tạo tháp từ con trỏ chuột
-                if (gold >= this.price) {
+                if (gold >= this.getPrice()) {
                     if (isBuying) {
                         tempTower.destroy();
                     }
@@ -83,26 +111,30 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         //upgrade
         else {
             this.on('pointerdown', pointer => {
-                if (!isBuying) {
+                if (!isBuying && !isTowerClicked) {
                     console.log('tower clicked');
-                    let upgrade = this.Phaserscene.add.image(
+                    isTowerClicked = true;
+                    upgradeImage = this.Phaserscene.add.image(
                         this.x + CELL_SIZE / 2,
                         this.y - CELL_SIZE / 2,
                         'upgrade'
                     );
+                    if (this.level == 5) {
+                        upgradeImage.setAlpha(0.5);
+                    }
+                    upgradeImage.setInteractive();
 
-                    upgrade.setInteractive();
-
-                    upgrade.on('pointerdown', pointer => {
+                    upgradeImage.on('pointerdown', pointer => {
                         console.log('upgrade clicked');
 
                         if (this.level == 5) {
-                            upgrade.setAlpha(0.5);
                             return;
                         }
 
                         gold -= this.getUpgradeCost();
                         goldText.setText(`Vàng: ${gold}`);
+
+                        towers.splice(towers.indexOf(this), 1);
 
                         let tower = new Tower(
                             this.Phaserscene,
@@ -111,40 +143,41 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                             this.getNextLevelName(),
                             this.level + 1
                         );
-                        towers.splice(towers.indexOf(this), 1);
+                        
+                        isTowerClicked = false;
                         towers.push(tower);
-                        upgrade.destroy();
+                        upgradeImage.destroy();
                         this.destroy();
-                        sell.destroy();
+                        sellImage.destroy();
                     });
-                    upgrade.setDisplaySize(25, 25);
+                    upgradeImage.setDisplaySize(25, 25);
 
-                    let sell = this.Phaserscene.physics.add.sprite(
+                    sellImage = this.Phaserscene.physics.add.sprite(
                         this.x + CELL_SIZE / 2,
                         this.y + CELL_SIZE / 2,
                         'sell'
                     );
 
-                    sell.play('rotate');
-                    sell.setInteractive();
+                    sellImage.play('rotate');
+                    sellImage.setInteractive();
 
-                    sell.on('pointerdown', pointer => {
+                    sellImage.on('pointerdown', pointer => {
                         console.log('sell clicked');
                         gold += this.getPrice();
                         goldText.setText(`Vàng: ${gold}`);
                         towers.splice(towers.indexOf(this), 1);
-                        // console.log(this)
+                    
                         let square = new Square(
                             this.Phaserscene,
                             this.posX,
                             this.posY
                         );
-                        console.log(this);
-                        sell.destroy();
-                        upgrade.destroy();
+                        isTowerClicked = false;
+                        sellImage.destroy();
+                        upgradeImage.destroy();
                         this.destroy();
                     });
-                    sell.setDisplaySize(25, 25);
+                    sellImage.setDisplaySize(25, 25);
                 }
             });
         }
@@ -159,7 +192,108 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         return this.texture.key;
     }
 
-    bullet() {}
+    getRange() {
+        if (this.getName() == 'power1') {
+            this.range = 80;
+        } else if (this.getName() == 'power2') {
+            this.range = 80;
+        } else if (this.getName() == 'power3') {
+            this.range = 80;
+        } else if (this.getName() == 'power4') {
+            this.range = 80;
+        } else if (this.getName() == 'power5') {
+            this.range = 80;
+        }
 
-    shoot() {}
+        if (this.getName() == 'frozen1') {
+            this.range = 20;
+        } else if (this.getName() == 'frozen2') {
+            this.range = 22;
+        } else if (this.getName() == 'frozen3') {
+            this.range = 24;
+        } else if (this.getName() == 'frozen4') {
+            this.range = 26;
+        } else if (this.getName() == 'frozen5') {
+            this.range = 30;
+        }
+        this.range += CELL_SIZE;
+        return this.range
+    }
+
+    getCharge() {
+        if (this.getName() == 'frozen1') {
+            return 1000
+        } else if (this.getName() == 'frozen2') {
+            return 900
+        } else if (this.getName() == 'frozen3') {
+            return 800
+        } else if (this.getName() == 'frozen4') {
+            return 600
+        } else if (this.getName() == 'frozen5') {
+            return 300 
+        }
+    }
+
+    getBulletName() {
+        if (this.getName() == 'frozen1') {
+            return "bullet1"
+        } else if (this.getName() == 'frozen2') {
+            return "bullet2"
+        } else if (this.getName() == 'frozen3') {
+            return "bullet3"
+        } else if (this.getName() == 'frozen4') {
+            return "bullet4"
+        } else if (this.getName() == 'frozen5') {
+            return "bullet5"
+        }
+    }
+
+    shoot() {
+        let minDistance = this.range;
+
+        monsters.forEach(monster => {
+            let dist = getDistance(this, monster);
+            if (
+                this.isReady && //sẵn sàng bắn // chờ nạp đạn
+                minDistance > dist
+            ) {
+                minDistance = dist;
+                this.target = monster;
+            }
+        });
+
+        if (minDistance < this.range) {
+            //nạp đạn
+            this.setTint('0xff00');
+            // tower.setAlpha(0.5)
+            this.isReady = false;
+            this.Phaserscene.time.addEvent({
+                delay: this.getCharge(),
+                callback: () => {
+                    this.clearTint();
+                    this.isReady = true;
+                },
+                callbackScope: this.Phaserscene,
+                loop: false
+            });
+
+            //Tạo đạn và bắn
+
+            let bullet = new Bullet(this.Phaserscene, this.x, this.y, this.getBulletName(), this.level);
+            bullet.target = this.target;
+            this.target.aimed.push(bullet);
+ 
+            this.Phaserscene.physics.add.overlap(
+                bullet,
+                bullet.target,
+                dealDamage,
+                null,
+                this.Phaserscene
+            );
+
+            
+            bullets.push(bullet);
+            
+        }
+    }
 }

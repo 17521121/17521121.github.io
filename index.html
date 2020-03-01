@@ -71,7 +71,9 @@
 
         var monsters = [];
         var pathOfMonsters = []
-
+        var sellImage;
+        var upgradeImage;
+        var isTowerClicked = false;
         var gold = null;
         var goldText = null;
 
@@ -97,7 +99,6 @@
         function preload() {
             this.load.image('square', '/img/square1.png');
             this.load.image('bigBee', '/img/bigBee.png');
-            this.load.image('frozen', '/img/frozen.png');
             this.load.image('arrow', '/img/arrow.png');
 
             this.load.image('bullet', '/img/bullet.png');
@@ -111,6 +112,14 @@
             this.load.spritesheet('sell', '/img/coin.png', { frameWidth: 32, frameHeight: 32 });
 
             this.load.spritesheet('ani_beast', '/img/ani_beast.png', { frameWidth: 32, frameHeight: 53 });
+
+            this.load.image('frozen0', '/img/frozen0.png');
+            this.load.image('frozen1', '/img/frozen0.png');
+            this.load.image('frozen2', '/img/frozen0.png');
+            this.load.image('frozen3', '/img/frozen0.png');
+            this.load.image('frozen4', '/img/frozen0.png');
+            this.load.image('frozen5', '/img/frozen0.png');
+
 
             this.load.image('power0', '/img/tower/power/0.png');
             this.load.image('power1', '/img/tower/power/1.png');
@@ -166,7 +175,9 @@
             this.add.text(560, 200, 'Tháp', { fontSize: '20px', fill: '#aaa' });
             this.add.text(560, 420, 'Skill', { fontSize: '20px', fill: '#aaa' });
 
-            sampleTower1 = new Tower(this, 580, 300, 'power0')
+            sampleTower1 = new Tower(this, 580, 340, 'frozen0')
+            sampleTower2 = new Tower(this, 640, 340, 'power0')
+
 
             // this.add.image(580, 300, `0.png`).setDisplaySize(40, 40)
             // this.add.image(580, 350, "arrow").setDisplaySize(40, 40);
@@ -176,7 +187,7 @@
 
 
             //Wave
-            // let monsterRespawnEvent = this.time.addEvent({ delay: 10000, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
+            // let monsterRespawnEvent = this.time.addEvent({ delay: 2000, callback: () => monsterRespawn.call(this, 5), callbackScope: this, loop: true });
             monsterRespawn.call(this, 15)
 
             //is buying
@@ -191,26 +202,43 @@
             // Huỷ chọn mua tháp khi click ra ngoài
             this.input.on("pointerdown", (pointer) => {
                 if (
-                    isBuying
+                    (isBuying || isTowerClicked)
                     &&
                     pointer.y > GAME_HEIGHT + OFFSET_Y
                 ) {
                     console.log("clicked everywhere")
                     isBuying = false;
                     tempTower.destroy();
+                    if (upgradeImage) {
+                        upgradeImage.destroy()
+                    }
+                    if (sellImage) {
+                        sellImage.destroy();
+                    }
+                    isTowerClicked = false;
                 }
             })
         }
 
-        function monsterReachEndpoint(tween, targets, sprite) {
+        function monsterReachEndpoint(tween, targets, monster) {
             life -= 1;
             lifeText.setText(`Máu: ${life}`)
-            // tween.stop();
             let index = monsterVecs.indexOf(targets[0]);
             monsterVecs.splice(index, 1)
+
+            let i = bullets.length - 1
+            while (i >= 0) {
+                if (bullets[i].target === monster) {
+                    bullets[i].destroy();
+                    bullets.splice(i, 1)
+                }
+                i--;
+            }
+
+
             monsters.splice(index, 1)
             pathOfMonsters.splice(index, 1)
-            sprite.destroy();
+            monster.destroy();
         }
 
         function monsterRespawn(number) {
@@ -218,9 +246,7 @@
             for (let i = 0; i < number; i++) {
                 this.time.addEvent({
                     delay: i * 650, callback: () => {
-
                         let monster = new Monster(this, 0, 0, "ani_beast")
-
                         //monster body shape for collision
                         // monster.setInteractive(new Phaser.Geom.Polygon([
                         //     50, 560,
@@ -255,71 +281,13 @@
             )
         }
 
-        function shoot(monsters, towers) {
-            //shoot
-            towers.forEach(tower => {
-                let minDistance = tower.range
-
-                monsters.forEach(monster => {
-                    let dist = getDistance(tower, monster)
-                    if (
-                        tower.isReady //sẵn sàng bắn // chờ nạp đạn
-                        && minDistance > dist
-                    ) {
-                        minDistance = dist
-                        tower.target = monster
-                    }
-                })
-
-                if (minDistance < tower.range) {
-                    //nạp đạn
-                    tower.setTint("0xff00")
-                    // tower.setAlpha(0.5)
-                    tower.isReady = false;
-                    this.time.addEvent({
-                        delay: 2000, callback: () => {
-                            tower.clearTint()
-                            tower.isReady = true;
-                        }, callbackScope: this, loop: false
-                    });
-
-                    //Tạo đạn và bắn
-
-                    let bullet = new Bullet(this, tower.x, tower.y , "bullet", 1)
-
-                    // let bullet = this.physics.add.image(tower.x, tower.y, 'bullet');
-                    
-                    bullet.target = tower.target
-                    this.physics.add.overlap(bullet, bullet.target, dealDamage, null, this);
-
-                    // this.input.enableDebug(bullet, 0xff00ff);
-                    bullets.push(bullet)
-                }
-
-                else {
-                    tower.setDisplaySize(40, 40)
-                }
-            })
-        }
 
         function moveTo(source, target, speed) {
-            //use linearInterpolation instead
+            //rad
+            let angle = Math.atan2(target.x - source.x, target.y - source.y);
 
-            let angle = Math.atan2(Math.abs(target.x - source.x), Math.abs(target.y - source.y));
-
-            if (target.x > source.x) {
-                source.setVelocityX(speed * Math.sin(angle))
-            }
-            else {
-                source.setVelocityX(-1 * speed * Math.sin(angle))
-            }
-
-            if (target.y > source.y) {
-                source.setVelocityY(speed * Math.cos(angle))
-            }
-            else {
-                source.setVelocityY(-1 * speed * Math.cos(angle))
-            }
+            source.setAngle(Phaser.Math.RAD_TO_DEG * Phaser.Math.Angle.Between(source.x, source.y, target.x, target.y));
+            source.setVelocity(Math.sin(angle) * speed, Math.cos(angle) * speed)
 
         }
 
@@ -333,37 +301,22 @@
                 return
             }
 
-
-
             //landing monster move
             monsters.forEach((monster, index) => {
                 graphics.lineStyle(2, 0xffffff, 1);
                 if (monster.type == "landing") {
-
                     graphics.lineStyle(2, 0xffffff, 1);
-
                     pathOfMonsters[index].draw(graphics);
-                    // console.log(monsterVecs[index].t)
-
                     pathOfMonsters[index].getPoint(monsterVecs[index].t, monsterVecs[index].vec);
-                    monster.setPosition(monsterVecs[index].vec.x, monsterVecs[index].vec.y)
-
-                    // health draw
-                    graphics.lineStyle(2, 0xff00, 0.5);
-                    graphics.strokeRoundedRect(monster.x - monster.width / 2, monster.y + CELL_SIZE / 2, monster.width, CELL_SIZE / 7, 0);
-                    graphics.fillStyle(0x00ff00, 1);
-                    graphics.fillRect(monster.x - monster.width / 2, monster.y + CELL_SIZE / 2, monster.width * monster.health / monster.maxHealth, CELL_SIZE / 7);
-                    //end health draw
-
+                    monster.setPosWithHealth(monsterVecs[index].vec.x, monsterVecs[index].vec.y);
                 }
-
             })
 
             //Cập nhật đường đạn
             bullets.forEach(bullet => moveTo.call(this, bullet, bullet.target, bullet.speed));
 
             //fire
-            shoot.call(this, monsters, towers)
+            towers.forEach(tower => tower.shoot())
 
         }
     </script>
