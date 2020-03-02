@@ -113,13 +113,6 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         monsters.splice(index, 1);
         pathOfMonsters.splice(index, 1);
 
-        this.Phaserscene.anims.create({
-            key: 'dead',
-            frames: 'onDead',
-            frameRate: 500,
-            repeat: 0
-        });
-
         this.anims.play('dead');
         this.setAlpha(0.5)
         this.setDisplaySize(30,40)

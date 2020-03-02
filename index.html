@@ -21,6 +21,7 @@
 <body>
 
     <script>
+        console.log = function() {}
 
         var mazePuzzle;
 
@@ -40,8 +41,9 @@
         var lifeText;
         var wave;
         var waveText;
+        var nextWave;
         var waveDelay = 15000
-       
+
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -150,6 +152,12 @@
         }
 
         function create() {
+            this.anims.create({
+                key: 'dead',
+                frames: 'onDead',
+                frameRate: 500,
+                repeat: 0
+            });
 
             let background = this.add.image(0, OFFSET_Y - CELL_SIZE / 2, "background").setOrigin(0)
             background.setDepth(-3)
@@ -201,7 +209,8 @@
 
             //Wave
             monsterRespawnEvent = this.time.addEvent({ delay: waveDelay, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
-            waveText = this.add.text(10, 20, `Đợt kế: ${monsterRespawnEvent.getProgress().toString()}`)
+
+            nextWave = this.add.text(10, 20, `Đợt kế: ${monsterRespawnEvent.getProgress().toString()}`)
             // monsterRespawn.call(this, 15)
 
             //is buying
@@ -271,15 +280,15 @@
         }
 
         function dealDamage(bullet, monster) {
-            console.log("touch monster")
+            // console.log("touch monster")
             monster.health -= bullet.damage
+
+            bullets.splice(bullets.indexOf(bullet), 1)
+            bullet.destroy();
 
             if (monster.health <= 0) {
                 monster.dead();
             }
-
-            bullets.splice(bullets.indexOf(bullet), 1)
-            bullet.destroy();
 
         }
 
@@ -304,7 +313,7 @@
         function update(time, delta) {
 
             graphics.clear();
-            waveText.setText('Đợt kế: ' + (waveDelay - waveDelay*parseFloat(monsterRespawnEvent.getProgress().toString().substr(0, 4)))/1000);
+            nextWave.setText('Đợt kế: ' + (waveDelay - waveDelay * parseFloat(monsterRespawnEvent.getProgress().toString().substr(0, 4))) / 1000);
 
             //end game/ 1000
             if (life < 1) {
