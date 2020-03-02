@@ -202,6 +202,10 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                             this.posX,
                             this.posY
                         );
+
+                        COLLISION[this.posY][this.posX] = 0;
+                        mazePuzzle = findWay(COLLISION, START_POS, END_POS)
+
                         isTowerClicked = false;
                         sellImage.destroy();
                         upgradeImage.destroy();
