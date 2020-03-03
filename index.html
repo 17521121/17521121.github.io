@@ -44,6 +44,11 @@
         var waveDelay = 15000
         var gold = null;
         var goldText = null;
+        var sellImage;
+        var upgradeImage;
+        var upgradeText;
+        var sellText;
+        var detailText;
         
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -71,11 +76,11 @@
         var GAME_HEIGHT = 520;
         var CELL_SIZE = 40;
        
-        var sellImage;
-        var upgradeImage;
+    
         
         var isBuying = false;
         var isTowerClicked = false;
+        var detailTextClicked = false;
 
         var monsterRespawnEvent
         var config = {
@@ -199,7 +204,7 @@
 
 
             //Wave
-            // monsterRespawn.call(this, 15)
+            monsterRespawn.call(this, 15)
             monsterRespawnEvent = this.time.addEvent({ delay: waveDelay, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
 
             nextWave = this.add.text(10, 20, `Đợt kế: ${monsterRespawnEvent.getProgress().toString()}`)
@@ -214,6 +219,9 @@
 
             // Huỷ chọn mua tháp khi click ra ngoài
             this.input.on("pointerdown", (pointer) => {
+                if(detailTextClicked) {
+                    detailText.destroy();
+                }
                 if (
                     (isBuying || isTowerClicked)
                 ) {

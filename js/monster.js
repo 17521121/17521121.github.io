@@ -32,6 +32,15 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
     init() {
         this.direction = "down"
+        this.setInteractive();
+        this.on('pointerdown', pointer => {
+            if(detailText) {
+                detailText.destroy()
+            }
+            detailText = this.Phaserscene.add.text(150, 630, `Máu:${this.health}\nTốc độ:${this.speed}km/h\nVàng:${this.getPrice()}`, { fontStyle: "bold", fontSize: '20px', fill: '#ff0000' });
+            detailTextClicked = false;
+            this.Phaserscene.time.addEvent({ delay: 100, callback: () => detailTextClicked = true, callbackScope: this, loop: true });
+        })
 
         if (this.getName() == 'ani_beast') {
             this.Phaserscene.anims.create({

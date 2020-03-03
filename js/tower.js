@@ -11,7 +11,6 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         this.isReady = true;
         this.range;
         this.price;
-        this.recharge;
 
         this.setDepth(1);
         this.setInteractive();
@@ -81,17 +80,14 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
 
     getDisplaySize() {
         this.setDisplaySize(40, 40);
-        if(this.getName() == "frozen2") {
+        if (this.getName() == 'frozen2') {
             this.setDisplaySize(45, 45);
-        } else
-        if(this.getName() == "frozen3") {
+        } else if (this.getName() == 'frozen3') {
             this.setDisplaySize(40, 40);
-        } else
-        if(this.getName() == "frozen4") {
+        } else if (this.getName() == 'frozen4') {
             this.setDisplaySize(50, 50);
             // this.setTint()
-        } else
-        if(this.getName() == "frozen5") {
+        } else if (this.getName() == 'frozen5') {
             this.setDisplaySize(70, 70);
         }
     }
@@ -142,6 +138,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
             this.on('pointerdown', pointer => {
                 if (!isBuying) {
                     console.log('tower clicked');
+
                     if (isTowerClicked) {
                         upgradeImage.destroy();
                         sellImage.destroy();
@@ -168,6 +165,10 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     upgradeImage.setInteractive();
 
                     upgradeImage.on('pointerdown', pointer => {
+                        if (detailText) {
+                            detailText.destroy();
+                        }
+
                         if (gold < this.getUpgradeCost()) {
                             return;
                         }
@@ -196,6 +197,34 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         this.destroy();
                         sellImage.destroy();
                     });
+
+                    upgradeImage.on('pointerover', pointer => {
+                        if (detailText) {
+                            detailText.destroy();
+                        }
+                        detailText = this.Phaserscene.add.text(
+                            150,
+                            640,
+                            `Nâng cấp: ${this.getUpgradeCost()}$`,
+                            {
+                                fontStyle: 'bold',
+                                fontSize: '20px',
+                                fill: '#ff0000'
+                            }
+                        );
+                        detailTextClicked = false;
+                        this.Phaserscene.time.addEvent({
+                            delay: 100,
+                            callback: () => (detailTextClicked = true),
+                            callbackScope: this,
+                            loop: true
+                        });
+                    });
+
+                    upgradeImage.on('pointerout', pointer => {
+                        detailText.destroy();
+                    });
+
                     upgradeImage.setDisplaySize(25, 25);
 
                     sellImage = this.Phaserscene.physics.add.sprite(
@@ -208,6 +237,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     sellImage.setInteractive();
 
                     sellImage.on('pointerdown', pointer => {
+                        detailText.destroy();
                         console.log('sell clicked');
                         gold += this.getPrice();
                         goldText.setText(`${gold}`);
@@ -227,9 +257,88 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         upgradeImage.destroy();
                         this.destroy();
                     });
+
+                    sellImage.on('pointerover', pointer => {
+                        if (detailText) {
+                            detailText.destroy();
+                        }
+                        detailText = this.Phaserscene.add.text(
+                            150,
+                            640,
+                            `Bán giá: ${this.getPrice()}$`,
+                            {
+                                fontStyle: 'bold',
+                                fontSize: '20px',
+                                fill: '#ff0000'
+                            }
+                        );
+                        detailTextClicked = false;
+                        this.Phaserscene.time.addEvent({
+                            delay: 100,
+                            callback: () => (detailTextClicked = true),
+                            callbackScope: this,
+                            loop: true
+                        });
+                    });
+
+                    sellImage.on('pointerout', pointer => {
+                        detailText.destroy();
+                    });
+
                     sellImage.setDisplaySize(25, 25);
                 }
             });
+
+            this.on('pointerover', pointer => {
+                //show detailed tower
+                if (detailText) {
+                    detailText.destroy();
+                }
+                detailText = this.Phaserscene.add.text(
+                    150,
+                    630,
+                    `Level:${
+                        this.level
+                    }$\nRange:${this.getRange()}\nTốc độ bắn:${this.getCharge()}`,
+                    { fontStyle: 'bold', fontSize: '20px', fill: '#ff0000' }
+                );
+                detailTextClicked = false;
+                this.Phaserscene.time.addEvent({
+                    delay: 100,
+                    callback: () => (detailTextClicked = true),
+                    callbackScope: this,
+                    loop: true
+                });
+            });
+
+            this.on('pointerout', pointer => {
+                //show detailed tower
+                if (detailText) {
+                    detailText.destroy();
+                }
+                detailText = this.Phaserscene.add.text(
+                    150,
+                    630,
+                    `Level:${
+                        this.level
+                    }$\nRange:${this.getRange()}\nTốc độ bắn:${this.getCharge()}`,
+                    { fontStyle: 'bold', fontSize: '20px', fill: '#ff0000' }
+                );
+                detailTextClicked = false;
+                this.Phaserscene.time.addEvent({
+                    delay: 100,
+                    callback: () => (detailTextClicked = true),
+                    callbackScope: this,
+                    loop: true
+                });
+            });
+
+            this.on("pointerout", pointer => {
+                if (detailText) {
+                    detailText.destroy();
+                }
+                detailTextClicked = false;
+            })
         }
     }
 
