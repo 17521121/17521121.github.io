@@ -24,25 +24,27 @@
         // console.log = function() {}
 
         var mazePuzzle;
-
         var graphics;
+      
         var towers = []
+        var bullets = []
+        var monsters = [];
 
         var tempTower;
+
         var sampleTower1;
         var sampleTower2;
         var sampleTower3;
         var sampleTower4;
-
-        var bullets = []
-        var follower = null;
-        var isBuying = false;
+      
         var lifeText;
         var wave;
         var waveText;
         var nextWave;
         var waveDelay = 15000
-
+        var gold = null;
+        var goldText = null;
+        
         var COLLISION = [
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -62,23 +64,19 @@
 
         var START_POS = [0, 0];
         var END_POS = [13, 12];
-
-
         var OFFSET_Y = 100;
         var OFFSET_RIGHT_X = 180;
         var OFFSET_DOWN_Y = 30;
         var GAME_WIDTH = 520;
         var GAME_HEIGHT = 520;
         var CELL_SIZE = 40;
-
-
-        var monsters = [];
        
         var sellImage;
         var upgradeImage;
+        
+        var isBuying = false;
         var isTowerClicked = false;
-        var gold = null;
-        var goldText = null;
+
         var monsterRespawnEvent
         var config = {
             type: Phaser.AUTO,
@@ -86,9 +84,9 @@
             height: 650,
             physics: {
                 default: 'arcade',
-                arcade: {
-                    debug: true,
-                }
+                // arcade: {
+                //     debug: true,
+                // }
             },
             scene: {
                 preload: preload,
@@ -101,7 +99,7 @@
 
         function preload() {
             this.load.image('background', '/img/background.png');
-            this.load.image('square', '/img/square2.png');
+            this.load.image('square', '/img/square.png');
             this.load.image('arrow', '/img/arrow.png');
 
             this.load.image('bullet', '/img/bullet.png');
@@ -317,10 +315,9 @@
                 graphics.lineStyle(2, 0xffffff, 1);
                 if (monster.type == "landing") {
                     graphics.lineStyle(1, 0xffffff, 1);
-                    monster.path.draw(graphics)
+                    // monster.path.draw(graphics)
                     monster.path.getPoint(monster.follower.t, monster.follower.vec);
                     monster.setPosWithHealth(monster.follower.vec.x, monster.follower.vec.y);
-                    // monster.tween.stop();
                 }
             })
 

@@ -1,8 +1,8 @@
 class Square extends Phaser.Physics.Arcade.Sprite {
     //Type : range, melee, sample
     //name: power arrow frozen thunder
-    constructor(scene, x, y, name = "square", isInit = true) {
-        super(scene, x * CELL_SIZE + 20, y * CELL_SIZE + OFFSET_Y, name);
+    constructor(scene, x, y, isInit = true) {
+        super(scene, x * CELL_SIZE + 20, y * CELL_SIZE + OFFSET_Y);
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.Phaserscene = scene;

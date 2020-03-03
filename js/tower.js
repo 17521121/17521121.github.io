@@ -13,7 +13,6 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         this.price;
         this.recharge;
 
-        this.setDisplaySize(40, 40);
         this.setDepth(1);
         this.setInteractive();
 
@@ -80,9 +79,27 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         return this.price;
     }
 
+    getDisplaySize() {
+        this.setDisplaySize(40, 40);
+        if(this.getName() == "frozen2") {
+            this.setDisplaySize(45, 45);
+        } else
+        if(this.getName() == "frozen3") {
+            this.setDisplaySize(40, 40);
+        } else
+        if(this.getName() == "frozen4") {
+            this.setDisplaySize(50, 50);
+            // this.setTint()
+        } else
+        if(this.getName() == "frozen5") {
+            this.setDisplaySize(70, 70);
+        }
+    }
+
     init() {
         this.price = this.getPrice();
         this.range = this.getRange();
+        this.getDisplaySize();
 
         //buy sample tower
         if (this.getName().substr(-1) == '0') {
@@ -125,7 +142,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
             this.on('pointerdown', pointer => {
                 if (!isBuying) {
                     console.log('tower clicked');
-                    if(isTowerClicked) {
+                    if (isTowerClicked) {
                         upgradeImage.destroy();
                         sellImage.destroy();
                     }
@@ -139,7 +156,6 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         loop: false
                     });
 
-                    
                     upgradeImage = this.Phaserscene.physics.add.image(
                         this.x + CELL_SIZE / 2,
                         this.y - CELL_SIZE / 2,
@@ -148,12 +164,12 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     if (this.level == 5) {
                         upgradeImage.setAlpha(0.5);
                     }
-                   
+
                     upgradeImage.setInteractive();
 
                     upgradeImage.on('pointerdown', pointer => {
-                        if(gold < this.getUpgradeCost()) {
-                            return
+                        if (gold < this.getUpgradeCost()) {
+                            return;
                         }
                         console.log('upgrade clicked');
 
@@ -204,7 +220,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         );
 
                         COLLISION[this.posY][this.posX] = 0;
-                        mazePuzzle = findWay(COLLISION, START_POS, END_POS)
+                        mazePuzzle = findWay(COLLISION, START_POS, END_POS);
 
                         isTowerClicked = false;
                         sellImage.destroy();
@@ -304,7 +320,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
             //nạp đạn
             // this.setTint('0xff00');
             // tower.setAlpha(0.5)
-            this.rotation += 0.1
+            this.rotation += 0.1;
             this.isReady = false;
             this.Phaserscene.time.addEvent({
                 delay: this.getCharge(),
