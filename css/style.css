@@ -1,14 +1,14 @@
 body {
     margin: 0;
     padding: 0;
-    /* background-color: black; */
+    background-color: black;
     /* height: 100vh; */
 }
 
 canvas {
     padding: 0;
     display: block;
-    background-color: darkgray;
+    /* background-color: darkgray; */
     margin: auto;
-    border:1px solid #c3c3c3;
+    /* border:1px solid #c3c3c3; */
 }

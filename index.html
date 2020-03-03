@@ -66,7 +66,7 @@
         var END_POS = [13, 12];
         var OFFSET_Y = 100;
         var OFFSET_RIGHT_X = 180;
-        var OFFSET_DOWN_Y = 30;
+        var OFFSET_DOWN_Y = 80 ;
         var GAME_WIDTH = 520;
         var GAME_HEIGHT = 520;
         var CELL_SIZE = 40;
@@ -80,8 +80,8 @@
         var monsterRespawnEvent
         var config = {
             type: Phaser.AUTO,
-            width: 700,
-            height: 650,
+            width: GAME_WIDTH + OFFSET_RIGHT_X,
+            height: GAME_HEIGHT + OFFSET_Y + OFFSET_DOWN_Y,
             physics: {
                 default: 'arcade',
                 // arcade: {
