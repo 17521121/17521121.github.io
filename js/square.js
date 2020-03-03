@@ -83,7 +83,7 @@ class Square extends Phaser.Physics.Arcade.Sprite {
                 );
 
 
-                gold -= tower.getPrice();
+                gold -= tempTower.getPrice();
                 goldText.setText(`${gold}`);
 
                 this.destroy();

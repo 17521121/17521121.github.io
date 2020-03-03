@@ -152,7 +152,7 @@
             // let background = this.add.image(0, OFFSET_Y - CELL_SIZE / 2, "background").setOrigin(0)
             let background = this.add.image(-2, 0, "background1").setOrigin(0)
             background.setDepth(-3)
-            background.setDisplaySize(GAME_WIDTH + OFFSET_RIGHT_X, GAME_HEIGHT + OFFSET_Y + OFFSET_DOWN_Y)
+            background.setDisplaySize(GAME_WIDTH + OFFSET_RIGHT_X, 5 +GAME_HEIGHT + OFFSET_Y + OFFSET_DOWN_Y)
             for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
                 for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
                     if (!COLLISION[i][j]) {
