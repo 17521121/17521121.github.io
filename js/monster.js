@@ -19,17 +19,20 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         this.maxHealth;
         this.health;
         this.aimed = [];
-        this.posX = x;
-        this.posY = y;
         this.init();
-
+        this.lastPosX;
+        this.lastPosY;
         this.tween;
         this.follower;
         this.duration;
         this.path;
+
+        this.direction;
     }
 
     init() {
+        this.direction = "down"
+
         if (this.getName() == 'ani_beast') {
             this.Phaserscene.anims.create({
                 key: 'right',
@@ -127,23 +130,42 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
     }
 
     setPosWithHealth(posX, posY) {
+        this.lastPosX = this.x;
+        this.lastPosY = this.y;
         this.setPosition(posX, posY);
+
+        if(this.lastPosX > this.x && this.direction != "left") {
+            this.direction = "left";
+            this.anims.play("left")             
+        } else
+        if(this.lastPosX < this.x && this.direction != "right") {
+            this.direction = "right";
+            this.anims.play("right")             
+        } else
+        if(this.lastPosY > this.y && this.direction != "up") {
+            this.direction = "up";
+            this.anims.play("up")             
+        } else
+        if(this.lastPosY < this.y && this.direction != "down") {
+            this.direction = "down";
+            this.anims.play("down")             
+        }
 
         // health draw
         graphics.lineStyle(2, 0xff00, 0.5);
         graphics.strokeRoundedRect(
             this.x - this.width / 2,
-            this.y + CELL_SIZE / 2,
+            this.y + 22,
             this.width,
-            CELL_SIZE / 7,
+            4,
             0
         );
-        graphics.fillStyle(0x00ff00, 1);
+        graphics.fillStyle(0x00ff00, 1, 0.5);
         graphics.fillRect(
             this.x - this.width / 2,
-            this.y + CELL_SIZE / 2,
+            this.y + 22,
             (this.width * this.health) / this.maxHealth,
-            CELL_SIZE / 7
+            4
         );
         //end health draw
     }
