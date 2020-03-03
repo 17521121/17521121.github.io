@@ -140,7 +140,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     });
 
                     
-                    upgradeImage = this.Phaserscene.add.image(
+                    upgradeImage = this.Phaserscene.physics.add.image(
                         this.x + CELL_SIZE / 2,
                         this.y - CELL_SIZE / 2,
                         'upgrade'
@@ -148,7 +148,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     if (this.level == 5) {
                         upgradeImage.setAlpha(0.5);
                     }
-                    // upgradeImage.setCirle(1)
+                   
                     upgradeImage.setInteractive();
 
                     upgradeImage.on('pointerdown', pointer => {

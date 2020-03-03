@@ -10,7 +10,7 @@ class Square extends Phaser.Physics.Arcade.Sprite {
         this.setInteractive();
         this.posX = x;
         this.posY = y;
-        this.setAlpha(0.1)
+        this.setAlpha(0.1);
         // this.setDepth(0)
         this.init();
     }
@@ -24,58 +24,44 @@ class Square extends Phaser.Physics.Arcade.Sprite {
                 //Check isOkPath
 
                 COLLISION[this.posY][this.posX] = 1;
-                // console.log(this.posX, this.posY);
                 let temp = findWay(COLLISION, START_POS, END_POS);
                 //not ok
                 if (!temp) {
-                    console.log("can't");
                     COLLISION[this.posY][this.posX] = 0;
                     return;
                 }
 
-                // let tempPath = [];
-                // for (let i = 0; i < monsters.length; i++) {
-                //     if (monsters[i].type == 'landing') {
-                //         let pre = [
-                //             parseInt((monsters[i].y - OFFSET_Y) / CELL_SIZE),
-                //             parseInt(monsters[i].x / CELL_SIZE)
-                //         ];
-                //         let pos = [
-                //             Math.ceil((monsters[i].y - OFFSET_Y) / CELL_SIZE),
-                //             Math.ceil(monsters[i].x / CELL_SIZE)
-                //         ];
+                let tempPath = [];
+                for (let i = 0; i < monsters.length; i++) {
+                    if (monsters[i].type == 'landing') {
+                        // let pre = [
+                        //     parseInt((monsters[i].y - OFFSET_Y) / CELL_SIZE),
+                        //     parseInt(monsters[i].x / CELL_SIZE)
+                        // ];
 
-                //         let prePath = findWay(COLLISION, pre, END_POS);
-                //         let posPath = findWay(COLLISION, pos, END_POS);
-                //         if (prePath) {
-                //             if (posPath && posPath.length > prePath.length) {
-                //                 tempPath.push(posPath);
-                //             } else {
-                //                 tempPath.push(prePath);
-                //             }
-                //         } else if (posPath) {
-                //             tempPath.push(posPath);
-                //         } else {
-                //             COLLISION[this.posY][this.posX] = 0;
-                //             return;
-                //         }
-                //     }
-                // }
+                        let pre = [
+                            Math.ceil((monsters[i].y - OFFSET_Y) / CELL_SIZE),
+                            Math.ceil(monsters[i].x / CELL_SIZE)
+                        ];
+
+                        let prePath = findWay(COLLISION, pre, END_POS);
+                        if (!prePath) {
+                            COLLISION[this.posY][this.posX] = 0;
+                            return;
+                        }
+                        tempPath.push(prePath);
+                    } else {
+                        tempPath.push([]);
+                    }
+                }
 
                 //ok
 
                 mazePuzzle = temp;
                 //Cập nhật lại đường đi quái vật landing
-
-                // let path = new Phaser.Curves.Path(this.x, this.y);
-                // mazePuzzle.forEach(i => {
-                //     path.lineTo(
-                //         CELL_SIZE * i[1] + CELL_SIZE / 2,
-                //         i[0] * CELL_SIZE + OFFSET_Y
-                //     );
-                // });
-
-                // pathOfMonsters.push(path);
+                monsters.forEach((m, index) => {
+                    m.createPath(tempPath[index]);
+                });
 
                 let tower = new Tower(
                     this.Phaserscene,

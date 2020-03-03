@@ -21,7 +21,7 @@
 <body>
 
     <script>
-        console.log = function() {}
+        // console.log = function() {}
 
         var mazePuzzle;
 
@@ -37,7 +37,6 @@
         var bullets = []
         var follower = null;
         var isBuying = false;
-        var monsterVecs = []
         var lifeText;
         var wave;
         var waveText;
@@ -74,7 +73,7 @@
 
 
         var monsters = [];
-        var pathOfMonsters = []
+       
         var sellImage;
         var upgradeImage;
         var isTowerClicked = false;
@@ -87,9 +86,9 @@
             height: 650,
             physics: {
                 default: 'arcade',
-                // arcade: {
-                //     debug: true,
-                // }
+                arcade: {
+                    debug: true,
+                }
             },
             scene: {
                 preload: preload,
@@ -103,7 +102,6 @@
         function preload() {
             this.load.image('background', '/img/background.png');
             this.load.image('square', '/img/square2.png');
-            this.load.image('bigBee', '/img/bigBee.png');
             this.load.image('arrow', '/img/arrow.png');
 
             this.load.image('bullet', '/img/bullet.png');
@@ -119,13 +117,6 @@
             this.load.spritesheet('onDead', '/img/explosion.png', { frameWidth: 64, frameHeight: 64 });
 
             this.load.spritesheet('ani_beast', '/img/ani_beast.png', { frameWidth: 32, frameHeight: 53 });
-
-            // this.load.image('frozen0', '/img/frozen0.png');
-            // this.load.image('frozen1', '/img/frozen0.png');
-            // this.load.image('frozen2', '/img/frozen0.png');
-            // this.load.image('frozen3', '/img/frozen0.png');
-            // this.load.image('frozen4', '/img/frozen0.png');
-            // this.load.image('frozen5', '/img/frozen0.png');
 
             this.load.image('frozen0', '/img/tower/frozen/0.png');
             this.load.image('frozen1', '/img/tower/frozen/1.png');
@@ -208,10 +199,10 @@
 
 
             //Wave
+            monsterRespawn.call(this, 15)
             monsterRespawnEvent = this.time.addEvent({ delay: waveDelay, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
 
             nextWave = this.add.text(10, 20, `Đợt kế: ${monsterRespawnEvent.getProgress().toString()}`)
-            // monsterRespawn.call(this, 15)
 
             //is buying
             this.input.on("pointermove", (pointer) => {
@@ -247,9 +238,6 @@
         function monsterReachEndpoint(tween, targets, monster) {
             life -= 1;
             lifeText.setText(`Máu: ${life}`)
-            let index = monsterVecs.indexOf(targets[0]);
-            monsterVecs.splice(index, 1)
-
             let i = bullets.length - 1
             while (i >= 0) {
                 if (bullets[i].target === monster) {
@@ -259,15 +247,14 @@
                 i--;
             }
 
-            monsters.splice(index, 1)
-            pathOfMonsters.splice(index, 1)
+            monsters.splice(monsters.indexOf(monster), 1)
             monster.destroy();
         }
 
         function monsterRespawn(number) {
             wave += 1;
             waveText.setText(`Đợt: ${wave}`)
-            for (let i = 0; i < number; i++) {
+            for (let i = 0; i < 15; i++) {
                 this.time.addEvent({
                     delay: i * 650, callback: () => {
                         let monster = new Monster(this, 0, 0, "ani_beast")
@@ -300,7 +287,6 @@
             )
         }
 
-
         function moveTo(source, target, speed) {
             //rad
             let angle = Math.atan2(target.x - source.x, target.y - source.y);
@@ -313,24 +299,28 @@
         function update(time, delta) {
 
             graphics.clear();
-            nextWave.setText('Đợt kế: ' + (waveDelay - waveDelay * parseFloat(monsterRespawnEvent.getProgress().toString().substr(0, 4))) / 1000);
 
-            //end game/ 1000
+            //end game
             if (life < 1) {
                 this.physics.pause();
+                monsterRespawnEvent.destroy()
+                monsters.forEach(m =>
+                    m.destroy()
+                )
                 return
             }
 
-
+            nextWave.setText('Đợt kế: ' + (waveDelay - waveDelay * parseFloat(monsterRespawnEvent.getProgress().toString().substr(0, 4))) / 1000);
 
             //landing monster move
-            monsters.forEach((monster, index) => {
+            monsters.forEach((monster) => {
                 graphics.lineStyle(2, 0xffffff, 1);
                 if (monster.type == "landing") {
-                    graphics.lineStyle(2, 0xffffff, 1);
-                    // pathOfMonsters[index].draw(graphics);
-                    pathOfMonsters[index].getPoint(monsterVecs[index].t, monsterVecs[index].vec);
-                    monster.setPosWithHealth(monsterVecs[index].vec.x, monsterVecs[index].vec.y);
+                    graphics.lineStyle(1, 0xffffff, 1);
+                    monster.path.draw(graphics)
+                    monster.path.getPoint(monster.follower.t, monster.follower.vec);
+                    monster.setPosWithHealth(monster.follower.vec.x, monster.follower.vec.y);
+                    // monster.tween.stop();
                 }
             })
 

@@ -24,6 +24,9 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         this.init();
 
         this.tween;
+        this.follower;
+        this.duration;
+        this.path;
     }
 
     init() {
@@ -52,46 +55,52 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
             this.setCircle(10, 3, 15);
             this.type = 'landing';
-            this.maxHealth = 10 + wave*5;
-            this.health = 10 + wave*5;
+            this.maxHealth = 10 + wave * 5;
+            this.health = 10 + wave * 5;
             this.speed = 80;
         }
 
         if (this.type == 'flying') {
             this.setVelocity(80, 80);
-            pathOfMonsters.push([]);
-            monsterVecs.push(null);
         }
 
         if (this.type == 'landing') {
-            let path = new Phaser.Curves.Path(this.x, this.y);
-
-            mazePuzzle.forEach(i => {
-                path.lineTo(
-                    CELL_SIZE * i[1] + CELL_SIZE / 2,
-                    i[0] * CELL_SIZE + OFFSET_Y
-                );
-            });
-
-            pathOfMonsters.push(path);
-            let duration =
-                (Math.sqrt(path.getLength() * path.getLength()) / this.speed) *
-                1000;
-            let follower = { t: 0, vec: new Phaser.Math.Vector2() };
-
-            this.tween = this.Phaserscene.tweens.add({
-                targets: follower,
-                t: 1,
-                ease: 'start',
-                duration: duration, // change
-                yoyo: false,
-                repeat: -2,
-                onComplete: monsterReachEndpoint,
-                onCompleteParams: [this]
-            });
-
-            monsterVecs.push(follower);
+            this.createPath(mazePuzzle);
         }
+    }
+
+    createPath(solved) {
+        //solved is mazePuzzle
+        if(this.tween) {
+            this.tween.stop()
+        }
+         
+        this.path = new Phaser.Curves.Path(this.x, this.y);
+        // console.log(this.path)
+        // console.log(this.follower)
+        solved.forEach(i => {
+            this.path.lineTo(
+                CELL_SIZE * i[1] + CELL_SIZE / 2,
+                i[0] * CELL_SIZE + OFFSET_Y
+            );
+        });
+
+        this.duration =
+            (Math.sqrt(this.path.getLength() * this.path.getLength()) /
+                this.speed) *
+            1000;
+        this.follower = { t: 0, vec: new Phaser.Math.Vector2() };
+
+        this.tween = this.Phaserscene.tweens.add({
+            targets: this.follower,
+            t: 1,
+            ease: 'start',
+            duration: this.duration, // change
+            yoyo: false,
+            repeat: -2,
+            onComplete: monsterReachEndpoint,
+            onCompleteParams: [this]
+        });
     }
 
     dead() {
@@ -109,13 +118,11 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
             i--;
         }
 
-        monsterVecs.splice(index, 1);
         monsters.splice(index, 1);
-        pathOfMonsters.splice(index, 1);
 
         this.anims.play('dead');
-        this.setAlpha(0.5)
-        this.setDisplaySize(30,40)
+        this.setAlpha(0.5);
+        this.setDisplaySize(30, 40);
         // this.destroy();
     }
 
