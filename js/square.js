@@ -2,13 +2,12 @@ class Square extends Phaser.Physics.Arcade.Sprite {
     //Type : range, melee, sample
     //name: power arrow frozen thunder
     constructor(scene, x, y, isInit = true) {
-        super(scene, x * CELL_SIZE + 20, y * CELL_SIZE + OFFSET_Y);
+        super(scene, x * CELL_SIZE + 20, y * CELL_SIZE + OFFSET_Y, "square");
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.Phaserscene = scene;
         this.posX = x;
         this.posY = y;
-        // this.setDepth(0)
         this.setAlpha(0.1);
         if(isInit) {
             this.init();
@@ -17,8 +16,8 @@ class Square extends Phaser.Physics.Arcade.Sprite {
     
     init() {
         //decide buy
-        this.setInteractive();
         this.setDisplaySize(50, 50);
+        this.setInteractive();
         
         this.on('pointerdown', pointer => {
             console.log('clicked square');
@@ -69,7 +68,6 @@ class Square extends Phaser.Physics.Arcade.Sprite {
                 }
 
                 //ok
-
                 mazePuzzle = temp;
                 //Cập nhật lại đường đi quái vật landing
                 monsters.forEach((m, index) => {
@@ -86,7 +84,7 @@ class Square extends Phaser.Physics.Arcade.Sprite {
 
 
                 gold -= tower.getPrice();
-                goldText.setText(`Vàng: ${gold}`);
+                goldText.setText(`${gold}`);
 
                 this.destroy();
                 towers.push(tower);
@@ -96,6 +94,7 @@ class Square extends Phaser.Physics.Arcade.Sprite {
         this.on('pointerover', pointer => {
             if(isBuying) {
                 this.setAlpha(1)
+                
             }
         })
 

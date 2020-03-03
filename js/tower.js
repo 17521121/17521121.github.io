@@ -178,7 +178,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         }
 
                         gold -= this.getUpgradeCost();
-                        goldText.setText(`Vàng: ${gold}`);
+                        goldText.setText(`${gold}`);
 
                         towers.splice(towers.indexOf(this), 1);
 
@@ -210,7 +210,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     sellImage.on('pointerdown', pointer => {
                         console.log('sell clicked');
                         gold += this.getPrice();
-                        goldText.setText(`Vàng: ${gold}`);
+                        goldText.setText(`${gold}`);
                         towers.splice(towers.indexOf(this), 1);
 
                         let square = new Square(

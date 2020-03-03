@@ -21,7 +21,7 @@
 <body>
 
     <script>
-        // console.log = function() {}
+        console.log = function() {}
 
         var mazePuzzle;
         var graphics;
@@ -64,9 +64,9 @@
 
         var START_POS = [0, 0];
         var END_POS = [13, 12];
-        var OFFSET_Y = 100;
-        var OFFSET_RIGHT_X = 180;
-        var OFFSET_DOWN_Y = 80 ;
+        var OFFSET_Y = 110;
+        var OFFSET_RIGHT_X = 150;
+        var OFFSET_DOWN_Y = 60 ;
         var GAME_WIDTH = 520;
         var GAME_HEIGHT = 520;
         var CELL_SIZE = 40;
@@ -99,7 +99,8 @@
 
         function preload() {
             this.load.image('background', '/img/background.png');
-            this.load.image('square', '/img/square.png');
+            this.load.image('background1', '/img/background1.png');
+            this.load.image('square', '/img/square2.png');
             this.load.image('arrow', '/img/arrow.png');
 
             this.load.image('bullet', '/img/bullet.png');
@@ -148,9 +149,10 @@
                 repeat: 0
             });
 
-            let background = this.add.image(0, OFFSET_Y - CELL_SIZE / 2, "background").setOrigin(0)
+            // let background = this.add.image(0, OFFSET_Y - CELL_SIZE / 2, "background").setOrigin(0)
+            let background = this.add.image(-2, 0, "background1").setOrigin(0)
             background.setDepth(-3)
-            background.setDisplaySize(GAME_WIDTH + 10, GAME_HEIGHT + 15)
+            background.setDisplaySize(GAME_WIDTH + OFFSET_RIGHT_X, GAME_HEIGHT + OFFSET_Y + OFFSET_DOWN_Y)
             for (let i = 0; i < GAME_HEIGHT / CELL_SIZE; i++) {
                 for (let j = 0; j < GAME_WIDTH / CELL_SIZE; j++) {
                     if (!COLLISION[i][j]) {
@@ -173,21 +175,21 @@
                 repeat: -1
             });
 
-            this.add.text(1, 60, 'Cửa vào', { fontSize: '15px', fill: '#aaa' });
-            this.add.text(445, 605, 'Cửa ra', { fontSize: '20px', fill: '#aaa' });
-            waveText = this.add.text(300, 50, `Đợt ${wave}`, { fontSize: '20px', fill: '#aaa' });
+            this.add.text(5, 60, 'Cửa vào', { fontSize: '15px', fill: '#ffffff' });
+            this.add.text(445, 635, 'Cửa ra', { fontSize: '20px', fill: '#ffffff' });
+            waveText = this.add.text(300, 34, `${wave}`, { fontSize: '15px', fill: '#fff' });
 
-            lifeText = this.add.text(560, 150, `Máu ${life}`, { fontSize: '20px', fill: '#aaa' });
-            goldText = this.add.text(560, 180, `Vàng: ${gold}`, { fontSize: '20px', fill: '#aaa' });
+            lifeText = this.add.text(360, 150, `Máu ${life}`, { fontSize: '20px', fill: '#fff' });
+            goldText = this.add.text(620, 240, `${gold}`, { fontSize: '13px', fill: '#ffd64c' });
 
 
             // tháp mẫu
-            this.add.text(560, 200, 'Tháp', { fontSize: '20px', fill: '#aaa' });
-            this.add.text(560, 420, 'Skill', { fontSize: '20px', fill: '#aaa' });
+            // this.add.text(560, 200, 'Tháp', { fontSize: '20px', fill: '#aaa' });
+            // this.add.text(560, 420, 'Skill', { fontSize: '20px', fill: '#aaa' });
 
-            sampleTower1 = new Tower(this, 580, 340, 'frozen0')
+            sampleTower1 = new Tower(this, 640, 350, 'frozen0')
             // sampleTower2 = new Tower(this, 640, 340, 'power0')
-
+            // let monster = new Monster(this, 0, 0, "ani_beast").anims.play("left")
 
             // this.add.image(580, 300, `0.png`).setDisplaySize(40, 40)
             // this.add.image(580, 350, "arrow").setDisplaySize(40, 40);
@@ -197,7 +199,7 @@
 
 
             //Wave
-            monsterRespawn.call(this, 15)
+            // monsterRespawn.call(this, 15)
             monsterRespawnEvent = this.time.addEvent({ delay: waveDelay, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
 
             nextWave = this.add.text(10, 20, `Đợt kế: ${monsterRespawnEvent.getProgress().toString()}`)
@@ -251,7 +253,7 @@
 
         function monsterRespawn(number) {
             wave += 1;
-            waveText.setText(`Đợt: ${wave}`)
+            waveText.setText(`${wave}`)
             for (let i = 0; i < 15; i++) {
                 this.time.addEvent({
                     delay: i * 650, callback: () => {

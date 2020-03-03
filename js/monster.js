@@ -51,7 +51,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
                     { start: 6, end: 11 }
                 ),
                 frameRate: 10,
-                repeat: 0
+                repeat: -1
             });
 
             this.anims.play('right', true);
@@ -108,7 +108,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
     dead() {
         gold += this.getPrice();
-        goldText.setText(`Vàng: ${gold}`);
+        goldText.setText(`${gold}`);
         this.tween.stop();
         let index = monsters.indexOf(this);
 
