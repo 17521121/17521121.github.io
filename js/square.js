@@ -34,21 +34,32 @@ class Square extends Phaser.Physics.Arcade.Sprite {
                 let tempPath = [];
                 for (let i = 0; i < monsters.length; i++) {
                     if (monsters[i].type == 'landing') {
-                        // let pre = [
-                        //     parseInt((monsters[i].y - OFFSET_Y) / CELL_SIZE),
-                        //     parseInt(monsters[i].x / CELL_SIZE)
-                        // ];
 
                         let pre = [
-                            Math.ceil((monsters[i].y - OFFSET_Y) / CELL_SIZE),
-                            Math.ceil(monsters[i].x / CELL_SIZE)
+                            parseInt((monsters[i].y - OFFSET_Y) / CELL_SIZE),
+                            parseInt(monsters[i].x / CELL_SIZE)
                         ];
 
                         let prePath = findWay(COLLISION, pre, END_POS);
+                        
                         if (!prePath) {
                             COLLISION[this.posY][this.posX] = 0;
                             return;
                         }
+                        
+                        if(
+                            (prePath[0][1]*CELL_SIZE + CELL_SIZE/2 > monsters[i].x && monsters[i].x > prePath[1][1]*CELL_SIZE + CELL_SIZE/2)
+                            ||
+                            (prePath[0][1]*CELL_SIZE + CELL_SIZE/2 < monsters[i].x && monsters[i].x < prePath[1][1]*CELL_SIZE + CELL_SIZE/2)
+                            ||
+                            (prePath[0][0] * CELL_SIZE + OFFSET_Y > monsters[i].y && monsters[i].y > prePath[1][0] * CELL_SIZE + OFFSET_Y)
+                            ||
+                            (prePath[0][0] * CELL_SIZE + OFFSET_Y < monsters[i].y && monsters[i].y < prePath[1][0] * CELL_SIZE + OFFSET_Y)
+                        ) {
+                            prePath.splice(0,1)
+                        }
+
+
                         tempPath.push(prePath);
                     } else {
                         tempPath.push([]);

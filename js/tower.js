@@ -256,15 +256,15 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
 
     getCharge() {
         if (this.getName() == 'frozen1') {
-            return 1000;
-        } else if (this.getName() == 'frozen2') {
-            return 900;
-        } else if (this.getName() == 'frozen3') {
-            return 800;
-        } else if (this.getName() == 'frozen4') {
-            return 600;
-        } else if (this.getName() == 'frozen5') {
             return 300;
+        } else if (this.getName() == 'frozen2') {
+            return 200;
+        } else if (this.getName() == 'frozen3') {
+            return 100;
+        } else if (this.getName() == 'frozen4') {
+            return 50;
+        } else if (this.getName() == 'frozen5') {
+            return 30;
         }
     }
 
@@ -302,13 +302,14 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
 
         if (minDistance < this.range) {
             //nạp đạn
-            this.setTint('0xff00');
+            // this.setTint('0xff00');
             // tower.setAlpha(0.5)
+            this.rotation += 0.1
             this.isReady = false;
             this.Phaserscene.time.addEvent({
                 delay: this.getCharge(),
                 callback: () => {
-                    this.clearTint();
+                    // this.clearTint();
                     this.isReady = true;
                 },
                 callbackScope: this.Phaserscene,

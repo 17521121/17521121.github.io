@@ -11,14 +11,14 @@
 //     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
 //     [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 //     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-//     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+//     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
 //     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1]
 // ];
 
-// var START_POS = [0, 0];
+// var START_POS = [2, 0];
 // var END_POS = [13, 12];
 
-// var path = findWay(START_POS, END_POS);
+// var path = findWay(collision, START_POS, END_POS);
 // console.log(JSON.stringify(path))
 // console.log(path)
 
