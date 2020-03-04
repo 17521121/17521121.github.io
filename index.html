@@ -21,7 +21,7 @@
 <body>
 
     <script>
-        console.log = function() {}
+      
 
         var mazePuzzle;
         var graphics;
@@ -83,15 +83,17 @@
         var detailTextClicked = false;
 
         var monsterRespawnEvent
+
+        // console.log = function() {}
         var config = {
             type: Phaser.AUTO,
             width: GAME_WIDTH + OFFSET_RIGHT_X,
             height: GAME_HEIGHT + OFFSET_Y + OFFSET_DOWN_Y,
             physics: {
                 default: 'arcade',
-                arcade: {
-                    debug: true,
-                }
+                // arcade: {
+                //     debug: true,
+                // }
             },
             scene: {
                 preload: preload,
@@ -140,7 +142,7 @@
             wave = 1
 
             life = 10;
-            gold = 400;
+            gold = 500;
             graphics = this.add.graphics();
             mazePuzzle = findWay(COLLISION, START_POS, END_POS);
 
@@ -180,12 +182,17 @@
                 repeat: -1
             });
 
-            this.add.text(5, 60, 'Cửa vào', { fontSize: '15px', fill: '#ffffff' });
-            this.add.text(445, 635, 'Cửa ra', { fontSize: '20px', fill: '#ffffff' });
-            waveText = this.add.text(300, 34, `${wave}`, { fontSize: '15px', fill: '#fff' });
+            this.add.text(5, 60, 'Cửa vào', { fontSize: '15px', fill: '#ffffff',
+                        fontFamily: 'roboto' });
+            this.add.text(445, 635, 'Cửa ra', { fontSize: '20px', fill: '#ffffff',
+                        fontFamily: 'roboto' });
+            waveText = this.add.text(300, 34, `${wave}`, { fontSize: '15px', fill: '#fff',
+                        fontFamily: 'roboto' });
 
-            lifeText = this.add.text(360, 150, `Máu ${life}`, { fontSize: '20px', fill: '#fff' });
-            goldText = this.add.text(620, 240, `${gold}`, { fontSize: '13px', fill: '#ffd64c' });
+            lifeText = this.add.text(360, 150, `Máu ${life}`, { fontSize: '20px', fill: '#fff' ,
+                        fontFamily: 'roboto'});
+            goldText = this.add.text(615, 241, `${gold}`, { fontSize: '13px', fill: '#ffd64c' ,
+                        fontFamily: 'roboto'});
 
 
             // tháp mẫu
@@ -207,7 +214,8 @@
             monsterRespawn.call(this, 15)
             monsterRespawnEvent = this.time.addEvent({ delay: waveDelay, callback: () => monsterRespawn.call(this, 15), callbackScope: this, loop: true });
 
-            nextWave = this.add.text(10, 20, `Đợt kế: ${monsterRespawnEvent.getProgress().toString()}`)
+            nextWave = this.add.text(10, 20, `Đợt kế: ${monsterRespawnEvent.getProgress().toString()}`, { fontSize: '15px', fill: '#fff',
+                        fontFamily: 'roboto' });
 
             //is buying
             this.input.on("pointermove", (pointer) => {

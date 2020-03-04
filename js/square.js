@@ -20,8 +20,14 @@ class Square extends Phaser.Physics.Arcade.Sprite {
         this.setInteractive();
         
         this.on('pointerdown', pointer => {
+
+            this.setAlpha(0.1)
+
             console.log('clicked square');
             if (isBuying && gold >= 70) {
+
+
+
                 //Check isOkPath
 
                 COLLISION[this.posY][this.posX] = 1;

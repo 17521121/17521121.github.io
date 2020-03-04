@@ -31,16 +31,33 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
     }
 
     init() {
-        this.direction = "down"
+        this.direction = 'down';
         this.setInteractive();
         this.on('pointerdown', pointer => {
-            if(detailText) {
-                detailText.destroy()
+            if (detailText) {
+                detailText.destroy();
             }
-            detailText = this.Phaserscene.add.text(150, 630, `Máu:${this.health}\nTốc độ:${this.speed}km/h\nVàng:${this.getPrice()}`, { fontStyle: "bold", fontSize: '20px', fill: '#ff0000' });
+            detailText = this.Phaserscene.add.text(
+                150,
+                630,
+                `Máu: ${this.health}\nTốc độ: ${
+                    this.speed
+                }km/h\nVàng: ${this.getPrice()}`,
+                {
+                    fontStyle: 'bold',
+                    fontSize: '20px',
+                    fill: '#ff0000',
+                    fontFamily: 'roboto'
+                }
+            );
             detailTextClicked = false;
-            this.Phaserscene.time.addEvent({ delay: 100, callback: () => detailTextClicked = true, callbackScope: this, loop: true });
-        })
+            this.Phaserscene.time.addEvent({
+                delay: 100,
+                callback: () => (detailTextClicked = true),
+                callbackScope: this,
+                loop: true
+            });
+        });
 
         if (this.getName() == 'ani_beast') {
             this.Phaserscene.anims.create({
@@ -67,8 +84,8 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
             this.setCircle(10, 3, 15);
             this.type = 'landing';
-            this.maxHealth = 10 + wave*200;
-            this.health = 10 + wave*200;
+            this.maxHealth = 10 + wave * 200;
+            this.health = 10 + wave * 200;
             this.speed = 80;
         }
 
@@ -83,10 +100,10 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
     createPath(solved) {
         //solved is mazePuzzle
-        if(this.tween) {
-            this.tween.stop()
+        if (this.tween) {
+            this.tween.stop();
         }
-         
+
         this.path = new Phaser.Curves.Path(this.x, this.y);
         // console.log(this.path)
         // console.log(this.follower)
@@ -143,21 +160,18 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         this.lastPosY = this.y;
         this.setPosition(posX, posY);
 
-        if(this.lastPosX > this.x && this.direction != "left") {
-            this.direction = "left";
-            this.anims.play("left")             
-        } else
-        if(this.lastPosX < this.x && this.direction != "right") {
-            this.direction = "right";
-            this.anims.play("right")             
-        } else
-        if(this.lastPosY > this.y && this.direction != "up") {
-            this.direction = "up";
-            this.anims.play("up")             
-        } else
-        if(this.lastPosY < this.y && this.direction != "down") {
-            this.direction = "down";
-            this.anims.play("down")             
+        if (this.lastPosX > this.x && this.direction != 'left') {
+            this.direction = 'left';
+            this.anims.play('left');
+        } else if (this.lastPosX < this.x && this.direction != 'right') {
+            this.direction = 'right';
+            this.anims.play('right');
+        } else if (this.lastPosY > this.y && this.direction != 'up') {
+            this.direction = 'up';
+            this.anims.play('up');
+        } else if (this.lastPosY < this.y && this.direction != 'down') {
+            this.direction = 'down';
+            this.anims.play('down');
         }
 
         // health draw

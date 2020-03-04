@@ -133,7 +133,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
             });
         }
 
-        //upgrade
+        //upgrade or sell
         else {
             this.on('pointerdown', pointer => {
                 if (!isBuying) {
@@ -209,7 +209,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                             {
                                 fontStyle: 'bold',
                                 fontSize: '20px',
-                                fill: '#ff0000'
+                                fill: '#ff0000', fontFamily: "roboto"
                             }
                         );
                         detailTextClicked = false;
@@ -226,13 +226,13 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     });
 
                     upgradeImage.setDisplaySize(25, 25);
-
+                    upgradeImage.setDepth(3)
                     sellImage = this.Phaserscene.physics.add.sprite(
                         this.x + CELL_SIZE / 2,
                         this.y + CELL_SIZE / 2,
                         'sell'
                     );
-
+                    sellImage.setDepth(3)
                     sellImage.play('rotate');
                     sellImage.setInteractive();
 
@@ -252,6 +252,32 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         COLLISION[this.posY][this.posX] = 0;
                         mazePuzzle = findWay(COLLISION, START_POS, END_POS);
 
+                        monsters.forEach( (m) => {
+                            if(m.type == "landing") {
+                                let pre = [
+                                    parseInt((m.y - OFFSET_Y) / CELL_SIZE),
+                                    parseInt(m.x / CELL_SIZE)
+                                ];
+        
+                                let prePath = findWay(COLLISION, pre, END_POS);
+                                
+                                if(
+                                    (prePath[0][1]*CELL_SIZE + CELL_SIZE/2 > m.x && m.x > prePath[1][1]*CELL_SIZE + CELL_SIZE/2)
+                                    ||
+                                    (prePath[0][1]*CELL_SIZE + CELL_SIZE/2 < m.x && m.x < prePath[1][1]*CELL_SIZE + CELL_SIZE/2)
+                                    ||
+                                    (prePath[0][0] * CELL_SIZE + OFFSET_Y > m.y && m.y > prePath[1][0] * CELL_SIZE + OFFSET_Y)
+                                    ||
+                                    (prePath[0][0] * CELL_SIZE + OFFSET_Y < m.y && m.y < prePath[1][0] * CELL_SIZE + OFFSET_Y)
+                                ) {
+                                    prePath.splice(0,1)
+                                }
+        
+                                m.createPath(prePath);
+                            }
+                        });
+                       
+
                         isTowerClicked = false;
                         sellImage.destroy();
                         upgradeImage.destroy();
@@ -269,7 +295,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                             {
                                 fontStyle: 'bold',
                                 fontSize: '20px',
-                                fill: '#ff0000'
+                                fill: '#ff0000', fontFamily: "roboto"
                             }
                         );
                         detailTextClicked = false;
@@ -328,7 +354,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                     `Level:${
                         this.level
                     }$\nRange:${this.getRange()}\nTốc độ bắn:${this.getCharge()}`,
-                    { fontStyle: 'bold', fontSize: '20px', fill: '#ff0000' }
+                    { fontStyle: 'bold', fontSize: '20px', fill: '#ff0000' , fontFamily: "roboto"}
                 );
                 detailTextClicked = false;
                 this.Phaserscene.time.addEvent({
