@@ -23,7 +23,7 @@ class Square extends Phaser.Physics.Arcade.Sprite {
 
             this.setAlpha(0.1)
 
-            console.log('clicked square');
+            // console.log('clicked square');
             if (isBuying && gold >= 70) {
 
 

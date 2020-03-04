@@ -50,7 +50,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
            // this.setCircle(5, 4, -2);
             
            this.speed = 280;
-           this.damage = 70;
+           this.damage = 70
 
            this.setTint('0xffa500');
            this.setDisplaySize(20, 15);

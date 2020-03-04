@@ -137,7 +137,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         else {
             this.on('pointerdown', pointer => {
                 if (!isBuying) {
-                    console.log('tower clicked');
+                    // console.log('tower clicked');
 
                     if (isTowerClicked) {
                         upgradeImage.destroy();
@@ -172,7 +172,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         if (gold < this.getUpgradeCost()) {
                             return;
                         }
-                        console.log('upgrade clicked');
+                        // console.log('upgrade clicked');
 
                         if (this.level == 5) {
                             return;
@@ -238,7 +238,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
 
                     sellImage.on('pointerdown', pointer => {
                         detailText.destroy();
-                        console.log('sell clicked');
+                        // console.log('sell clicked');
                         gold += this.getPrice();
                         goldText.setText(`${gold}`);
                         towers.splice(towers.indexOf(this), 1);
