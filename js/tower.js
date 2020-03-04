@@ -79,16 +79,16 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
     }
 
     getDisplaySize() {
-        this.setDisplaySize(40, 40);
+        this.setDisplaySize(35, 35);
         if (this.getName() == 'frozen2') {
-            this.setDisplaySize(45, 45);
-        } else if (this.getName() == 'frozen3') {
             this.setDisplaySize(40, 40);
+        } else if (this.getName() == 'frozen3') {
+            this.setDisplaySize(35, 35);
         } else if (this.getName() == 'frozen4') {
-            this.setDisplaySize(50, 50);
+            this.setDisplaySize(40, 40);
             // this.setTint()
         } else if (this.getName() == 'frozen5') {
-            this.setDisplaySize(70, 70);
+            this.setDisplaySize(40, 40);
         }
     }
 
@@ -297,10 +297,16 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                 detailText = this.Phaserscene.add.text(
                     150,
                     630,
-                    `Level:${
+                    `Level: ${
                         this.level
-                    }$\nRange:${this.getRange()}\nTốc độ bắn:${this.getCharge()}`,
-                    { fontStyle: 'bold', fontSize: '20px', fill: '#ff0000' }
+                    }\nRange: ${this.getRange()}\nReload:${this.getCharge() /
+                        1000}/s`,
+                    {
+                        fontStyle: 'bold',
+                        fontSize: '20px',
+                        fill: '#ff0000',
+                        fontFamily: 'roboto'
+                    }
                 );
                 detailTextClicked = false;
                 this.Phaserscene.time.addEvent({
@@ -333,12 +339,12 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                 });
             });
 
-            this.on("pointerout", pointer => {
+            this.on('pointerout', pointer => {
                 if (detailText) {
                     detailText.destroy();
                 }
                 detailTextClicked = false;
-            })
+            });
         }
     }
 
@@ -365,15 +371,15 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         }
 
         if (this.getName() == 'frozen1') {
-            this.range = 20;
-        } else if (this.getName() == 'frozen2') {
-            this.range = 22;
-        } else if (this.getName() == 'frozen3') {
-            this.range = 24;
-        } else if (this.getName() == 'frozen4') {
-            this.range = 26;
-        } else if (this.getName() == 'frozen5') {
             this.range = 30;
+        } else if (this.getName() == 'frozen2') {
+            this.range = 35;
+        } else if (this.getName() == 'frozen3') {
+            this.range = 40;
+        } else if (this.getName() == 'frozen4') {
+            this.range = 45;
+        } else if (this.getName() == 'frozen5') {
+            this.range = 55;
         }
         this.range += CELL_SIZE;
         return this.range;
@@ -383,13 +389,13 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         if (this.getName() == 'frozen1') {
             return 300;
         } else if (this.getName() == 'frozen2') {
-            return 200;
+            return 280;
         } else if (this.getName() == 'frozen3') {
-            return 100;
+            return 250;
         } else if (this.getName() == 'frozen4') {
-            return 50;
+            return 200;
         } else if (this.getName() == 'frozen5') {
-            return 30;
+            return 180;
         }
     }
 

@@ -67,8 +67,8 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
             this.setCircle(10, 3, 15);
             this.type = 'landing';
-            this.maxHealth = 10 + wave * 25;
-            this.health = 10 + wave * 25;
+            this.maxHealth = 10 + wave*200;
+            this.health = 10 + wave*200;
             this.speed = 80;
         }
 
