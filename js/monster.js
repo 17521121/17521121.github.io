@@ -70,8 +70,29 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
                 repeat: -1
             });
 
+            //tạm thời
+            this.Phaserscene.anims.create({
+                key: 'up',
+                frames: this.Phaserscene.anims.generateFrameNumbers(
+                    'ani_beast',
+                    { start: 0, end: 5 }
+                ),
+                frameRate: 10,
+                repeat: -1
+            });
+
             this.Phaserscene.anims.create({
                 key: 'left',
+                frames: this.Phaserscene.anims.generateFrameNumbers(
+                    'ani_beast',
+                    { start: 6, end: 11 }
+                ),
+                frameRate: 10,
+                repeat: -1
+            });
+            
+            this.Phaserscene.anims.create({
+                key: 'down',
                 frames: this.Phaserscene.anims.generateFrameNumbers(
                     'ani_beast',
                     { start: 6, end: 11 }
@@ -84,9 +105,9 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
             this.setCircle(10, 3, 15);
             this.type = 'landing';
-            this.maxHealth = 10 + wave * 200;
-            this.health = 10 + wave * 200;
-            this.speed = 80;
+            this.maxHealth = 30 + wave*100;
+            this.health = 30 + wave * 100;
+            this.speed = 75;
         }
 
         if (this.type == 'flying') {

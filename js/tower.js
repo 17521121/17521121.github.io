@@ -100,7 +100,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         //buy sample tower
         if (this.getName().substr(-1) == '0') {
             this.on('pointerdown', pointer => {
-                console.log('sampleTower clicked');
+                // console.log('sampleTower clicked');
                 //tạo tháp từ con trỏ chuột
                 if (gold >= this.getPrice()) {
                     if (isBuying) {
