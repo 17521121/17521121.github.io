@@ -46,6 +46,7 @@
         var goldText = null;
         var sellImage;
         var upgradeImage;
+        var rangeImage;
         var upgradeText;
         var sellText;
         var detailText;
@@ -109,6 +110,9 @@
             this.load.image('background1', '/img/background1.png');
             this.load.image('square', '/img/square2.png');
             this.load.image('arrow', '/img/arrow.png');
+            
+            
+            this.load.image('tower_range', '/img/tower_range.png');
 
             this.load.image('bullet', '/img/bullet.png');
             this.load.image('bullet1', '/img/tower/frozen_bullet/1.png');
@@ -244,6 +248,9 @@
                     }
                     if (sellImage) {
                         sellImage.destroy();
+                    }
+                    if(rangeImage) {
+                        rangeImage.destroy();
                     }
                     isTowerClicked = false;
                 }

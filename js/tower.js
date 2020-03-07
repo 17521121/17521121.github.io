@@ -6,7 +6,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.Phaserscene = scene;
-
+       
         this.level = level;
         this.isReady = true;
         this.range;
@@ -19,6 +19,324 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         this.posY = (this.y - OFFSET_Y) / CELL_SIZE;
         if (isInit) {
             this.init();
+        }
+    }
+
+    init() {
+        this.price = this.getPrice();
+        this.range = this.getRange();
+
+    
+
+        this.getDisplaySize();
+
+        //buy sample tower
+        if (this.getName().substr(-1) == '0') {
+            this.on('pointerdown', pointer => {
+                // console.log('sampleTower clicked');
+                //tạo tháp từ con trỏ chuột
+                if (gold >= this.getPrice()) {
+                    if (isBuying) {
+                        tempTower.destroy();
+                    }
+
+                    isBuying = false;
+                    this.Phaserscene.time.addEvent({
+                        delay: 100,
+                        callback: () => {
+                            isBuying = true;
+                        },
+                        callbackScope: this,
+                        loop: false
+                    });
+
+                    tempTower = new Tower(
+                        this.Phaserscene,
+                        pointer.x,
+                        pointer.y,
+                        this.getName(),
+                        0,
+                        false
+                    );
+
+                    tempTower.setDepth(-1);
+
+                    tempTower.setAlpha(0.5);
+                }
+            });
+        }
+
+        //upgrade or sell
+        else {
+            this.on('pointerdown', pointer => {
+                if (!isBuying) {
+                    // console.log('tower clicked');
+                    if(rangeImage) {
+                        rangeImage.destroy()
+                    }
+                        
+                    if (isTowerClicked) {
+                        upgradeImage.destroy();
+                        sellImage.destroy();
+                    }
+
+                    rangeImage = this.Phaserscene.physics.add.image(this.x, this.y, "tower_range")
+                    rangeImage.setDisplaySize(this.range*2, this.range*2)
+                    rangeImage.setAlpha(0.4)
+
+                   
+                    isTowerClicked = false;
+                    this.Phaserscene.time.addEvent({
+                        delay: 100,
+                        callback: () => {
+                            isTowerClicked = true;
+                        },
+                        callbackScope: this,
+                        loop: false
+                    });
+
+                    upgradeImage = this.Phaserscene.physics.add.image(
+                        this.x + CELL_SIZE / 2,
+                        this.y - CELL_SIZE / 2,
+                        'upgrade'
+                    );
+                    if (this.level == 5) {
+                        upgradeImage.setAlpha(0.5);
+                    }
+
+                    upgradeImage.setInteractive();
+
+                    upgradeImage.on('pointerdown', pointer => {
+                        if (detailText) {
+                            detailText.destroy();
+                        }
+
+                        if (gold < this.getUpgradeCost()) {
+                            return;
+                        }
+                        // console.log('upgrade clicked');
+
+                        if (this.level == 5) {
+                            return;
+                        }
+
+                        gold -= this.getUpgradeCost();
+                        goldText.setText(`${gold}`);
+
+                        towers.splice(towers.indexOf(this), 1);
+
+                        let tower = new Tower(
+                            this.Phaserscene,
+                            this.x,
+                            this.y,
+                            this.getNextLevelName(),
+                            this.level + 1
+                        );
+
+                        
+                        rangeImage.destroy()
+                        isTowerClicked = false;
+
+                        towers.push(tower);
+                        upgradeImage.destroy();
+                        this.destroy();
+                        sellImage.destroy();
+                    });
+
+                    upgradeImage.on('pointerover', pointer => {
+                        if (detailText) {
+                            detailText.destroy();
+                        }
+                        detailText = this.Phaserscene.add.text(
+                            150,
+                            640,
+                            `Nâng cấp: ${this.getUpgradeCost()}$`,
+                            {
+                                fontStyle: 'bold',
+                                fontSize: '20px',
+                                fill: '#ff0000',
+                                fontFamily: 'roboto'
+                            }
+                        );
+                        detailTextClicked = false;
+                        this.Phaserscene.time.addEvent({
+                            delay: 100,
+                            callback: () => (detailTextClicked = true),
+                            callbackScope: this,
+                            loop: true
+                        });
+                    });
+
+                    upgradeImage.on('pointerout', pointer => {
+                        detailText.destroy();
+                    });
+
+                    upgradeImage.setDisplaySize(25, 25);
+                    upgradeImage.setDepth(3);
+                    sellImage = this.Phaserscene.physics.add.sprite(
+                        this.x + CELL_SIZE / 2,
+                        this.y + CELL_SIZE / 2,
+                        'sell'
+                    );
+                    sellImage.setDepth(3);
+                    sellImage.play('rotate');
+                    sellImage.setInteractive();
+
+                    sellImage.on('pointerdown', pointer => {
+                        detailText.destroy();
+                        // console.log('sell clicked');
+                        gold += this.getPrice();
+                        goldText.setText(`${gold}`);
+                        towers.splice(towers.indexOf(this), 1);
+
+                        let square = new Square(
+                            this.Phaserscene,
+                            this.posX,
+                            this.posY
+                        );
+
+                        COLLISION[this.posY][this.posX] = 0;
+                        mazePuzzle = findWay(COLLISION, START_POS, END_POS);
+
+                        monsters.forEach(m => {
+                            if (m.type == 'landing') {
+                                let pre = [
+                                    parseInt((m.y - OFFSET_Y) / CELL_SIZE),
+                                    parseInt(m.x / CELL_SIZE)
+                                ];
+
+                                let prePath = findWay(COLLISION, pre, END_POS);
+
+                                if (
+                                    (prePath[0][1] * CELL_SIZE + CELL_SIZE / 2 >
+                                        m.x &&
+                                        m.x >
+                                            prePath[1][1] * CELL_SIZE +
+                                                CELL_SIZE / 2) ||
+                                    (prePath[0][1] * CELL_SIZE + CELL_SIZE / 2 <
+                                        m.x &&
+                                        m.x <
+                                            prePath[1][1] * CELL_SIZE +
+                                                CELL_SIZE / 2) ||
+                                    (prePath[0][0] * CELL_SIZE + OFFSET_Y >
+                                        m.y &&
+                                        m.y >
+                                            prePath[1][0] * CELL_SIZE +
+                                                OFFSET_Y) ||
+                                    (prePath[0][0] * CELL_SIZE + OFFSET_Y <
+                                        m.y &&
+                                        m.y <
+                                            prePath[1][0] * CELL_SIZE +
+                                                OFFSET_Y)
+                                ) {
+                                    prePath.splice(0, 1);
+                                }
+
+                                m.createPath(prePath);
+                            }
+                        });
+
+                        isTowerClicked = false;
+                        rangeImage.destroy()
+
+                        sellImage.destroy();
+                        upgradeImage.destroy();
+                        this.destroy();
+                    });
+
+                    sellImage.on('pointerover', pointer => {
+                        if (detailText) {
+                            detailText.destroy();
+                        }
+                        detailText = this.Phaserscene.add.text(
+                            150,
+                            640,
+                            `Bán giá: ${this.getPrice()}$`,
+                            {
+                                fontStyle: 'bold',
+                                fontSize: '20px',
+                                fill: '#ff0000',
+                                fontFamily: 'roboto'
+                            }
+                        );
+                        detailTextClicked = false;
+                        this.Phaserscene.time.addEvent({
+                            delay: 100,
+                            callback: () => (detailTextClicked = true),
+                            callbackScope: this,
+                            loop: true
+                        });
+                    });
+
+                    sellImage.on('pointerout', pointer => {
+                        detailText.destroy();
+                    });
+
+                    sellImage.setDisplaySize(25, 25);
+                }
+            });
+
+            this.on('pointerover', pointer => {
+                //show detailed tower
+                if (detailText) {
+                    detailText.destroy();
+                }
+                detailText = this.Phaserscene.add.text(
+                    150,
+                    630,
+                    `Level: ${
+                        this.level
+                    }\nRange: ${this.getRange()}\nReload:${this.getCharge() /
+                        1000}/s`,
+                    {
+                        fontStyle: 'bold',
+                        fontSize: '20px',
+                        fill: '#ff0000',
+                        fontFamily: 'roboto'
+                    }
+                );
+                detailTextClicked = false;
+                this.Phaserscene.time.addEvent({
+                    delay: 100,
+                    callback: () => (detailTextClicked = true),
+                    callbackScope: this,
+                    loop: true
+                });
+            });
+
+            this.on('pointerout', pointer => {
+                //show detailed tower
+                if (detailText) {
+                    detailText.destroy();
+                }
+                detailText = this.Phaserscene.add.text(
+                    150,
+                    630,
+                    `Level:${
+                        this.level
+                    }$\nRange:${this.getRange()}\nTốc độ bắn:${this.getCharge()}`,
+                    {
+                        fontStyle: 'bold',
+                        fontSize: '20px',
+                        fill: '#ff0000',
+                        fontFamily: 'roboto'
+                    }
+                );
+                detailTextClicked = false;
+                this.Phaserscene.time.addEvent({
+                    delay: 100,
+                    callback: () => (detailTextClicked = true),
+                    callbackScope: this,
+                    loop: true
+                });
+            });
+
+            this.on('pointerout', pointer => {
+                if (detailText) {
+                    detailText.destroy();
+                }
+                detailTextClicked = false;
+            });
         }
     }
 
@@ -89,288 +407,6 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
             // this.setTint()
         } else if (this.getName() == 'frozen5') {
             this.setDisplaySize(40, 40);
-        }
-    }
-
-    init() {
-        this.price = this.getPrice();
-        this.range = this.getRange();
-        this.getDisplaySize();
-
-        //buy sample tower
-        if (this.getName().substr(-1) == '0') {
-            this.on('pointerdown', pointer => {
-                // console.log('sampleTower clicked');
-                //tạo tháp từ con trỏ chuột
-                if (gold >= this.getPrice()) {
-                    if (isBuying) {
-                        tempTower.destroy();
-                    }
-
-                    isBuying = false;
-                    this.Phaserscene.time.addEvent({
-                        delay: 100,
-                        callback: () => {
-                            isBuying = true;
-                        },
-                        callbackScope: this,
-                        loop: false
-                    });
-
-                    tempTower = new Tower(
-                        this.Phaserscene,
-                        pointer.x,
-                        pointer.y,
-                        this.getName(),
-                        0,
-                        false
-                    );
-
-                    tempTower.setDepth(-1);
-
-                    tempTower.setAlpha(0.5);
-                }
-            });
-        }
-
-        //upgrade or sell
-        else {
-            this.on('pointerdown', pointer => {
-                if (!isBuying) {
-                    // console.log('tower clicked');
-
-                    if (isTowerClicked) {
-                        upgradeImage.destroy();
-                        sellImage.destroy();
-                    }
-                    isTowerClicked = false;
-                    this.Phaserscene.time.addEvent({
-                        delay: 100,
-                        callback: () => {
-                            isTowerClicked = true;
-                        },
-                        callbackScope: this,
-                        loop: false
-                    });
-
-                    upgradeImage = this.Phaserscene.physics.add.image(
-                        this.x + CELL_SIZE / 2,
-                        this.y - CELL_SIZE / 2,
-                        'upgrade'
-                    );
-                    if (this.level == 5) {
-                        upgradeImage.setAlpha(0.5);
-                    }
-
-                    upgradeImage.setInteractive();
-
-                    upgradeImage.on('pointerdown', pointer => {
-                        if (detailText) {
-                            detailText.destroy();
-                        }
-
-                        if (gold < this.getUpgradeCost()) {
-                            return;
-                        }
-                        // console.log('upgrade clicked');
-
-                        if (this.level == 5) {
-                            return;
-                        }
-
-                        gold -= this.getUpgradeCost();
-                        goldText.setText(`${gold}`);
-
-                        towers.splice(towers.indexOf(this), 1);
-
-                        let tower = new Tower(
-                            this.Phaserscene,
-                            this.x,
-                            this.y,
-                            this.getNextLevelName(),
-                            this.level + 1
-                        );
-
-                        isTowerClicked = false;
-                        towers.push(tower);
-                        upgradeImage.destroy();
-                        this.destroy();
-                        sellImage.destroy();
-                    });
-
-                    upgradeImage.on('pointerover', pointer => {
-                        if (detailText) {
-                            detailText.destroy();
-                        }
-                        detailText = this.Phaserscene.add.text(
-                            150,
-                            640,
-                            `Nâng cấp: ${this.getUpgradeCost()}$`,
-                            {
-                                fontStyle: 'bold',
-                                fontSize: '20px',
-                                fill: '#ff0000', fontFamily: "roboto"
-                            }
-                        );
-                        detailTextClicked = false;
-                        this.Phaserscene.time.addEvent({
-                            delay: 100,
-                            callback: () => (detailTextClicked = true),
-                            callbackScope: this,
-                            loop: true
-                        });
-                    });
-
-                    upgradeImage.on('pointerout', pointer => {
-                        detailText.destroy();
-                    });
-
-                    upgradeImage.setDisplaySize(25, 25);
-                    upgradeImage.setDepth(3)
-                    sellImage = this.Phaserscene.physics.add.sprite(
-                        this.x + CELL_SIZE / 2,
-                        this.y + CELL_SIZE / 2,
-                        'sell'
-                    );
-                    sellImage.setDepth(3)
-                    sellImage.play('rotate');
-                    sellImage.setInteractive();
-
-                    sellImage.on('pointerdown', pointer => {
-                        detailText.destroy();
-                        // console.log('sell clicked');
-                        gold += this.getPrice();
-                        goldText.setText(`${gold}`);
-                        towers.splice(towers.indexOf(this), 1);
-
-                        let square = new Square(
-                            this.Phaserscene,
-                            this.posX,
-                            this.posY
-                        );
-
-                        COLLISION[this.posY][this.posX] = 0;
-                        mazePuzzle = findWay(COLLISION, START_POS, END_POS);
-
-                        monsters.forEach( (m) => {
-                            if(m.type == "landing") {
-                                let pre = [
-                                    parseInt((m.y - OFFSET_Y) / CELL_SIZE),
-                                    parseInt(m.x / CELL_SIZE)
-                                ];
-        
-                                let prePath = findWay(COLLISION, pre, END_POS);
-                                
-                                if(
-                                    (prePath[0][1]*CELL_SIZE + CELL_SIZE/2 > m.x && m.x > prePath[1][1]*CELL_SIZE + CELL_SIZE/2)
-                                    ||
-                                    (prePath[0][1]*CELL_SIZE + CELL_SIZE/2 < m.x && m.x < prePath[1][1]*CELL_SIZE + CELL_SIZE/2)
-                                    ||
-                                    (prePath[0][0] * CELL_SIZE + OFFSET_Y > m.y && m.y > prePath[1][0] * CELL_SIZE + OFFSET_Y)
-                                    ||
-                                    (prePath[0][0] * CELL_SIZE + OFFSET_Y < m.y && m.y < prePath[1][0] * CELL_SIZE + OFFSET_Y)
-                                ) {
-                                    prePath.splice(0,1)
-                                }
-        
-                                m.createPath(prePath);
-                            }
-                        });
-                       
-
-                        isTowerClicked = false;
-                        sellImage.destroy();
-                        upgradeImage.destroy();
-                        this.destroy();
-                    });
-
-                    sellImage.on('pointerover', pointer => {
-                        if (detailText) {
-                            detailText.destroy();
-                        }
-                        detailText = this.Phaserscene.add.text(
-                            150,
-                            640,
-                            `Bán giá: ${this.getPrice()}$`,
-                            {
-                                fontStyle: 'bold',
-                                fontSize: '20px',
-                                fill: '#ff0000', fontFamily: "roboto"
-                            }
-                        );
-                        detailTextClicked = false;
-                        this.Phaserscene.time.addEvent({
-                            delay: 100,
-                            callback: () => (detailTextClicked = true),
-                            callbackScope: this,
-                            loop: true
-                        });
-                    });
-
-                    sellImage.on('pointerout', pointer => {
-                        detailText.destroy();
-                    });
-
-                    sellImage.setDisplaySize(25, 25);
-                }
-            });
-
-            this.on('pointerover', pointer => {
-                //show detailed tower
-                if (detailText) {
-                    detailText.destroy();
-                }
-                detailText = this.Phaserscene.add.text(
-                    150,
-                    630,
-                    `Level: ${
-                        this.level
-                    }\nRange: ${this.getRange()}\nReload:${this.getCharge() /
-                        1000}/s`,
-                    {
-                        fontStyle: 'bold',
-                        fontSize: '20px',
-                        fill: '#ff0000',
-                        fontFamily: 'roboto'
-                    }
-                );
-                detailTextClicked = false;
-                this.Phaserscene.time.addEvent({
-                    delay: 100,
-                    callback: () => (detailTextClicked = true),
-                    callbackScope: this,
-                    loop: true
-                });
-            });
-
-            this.on('pointerout', pointer => {
-                //show detailed tower
-                if (detailText) {
-                    detailText.destroy();
-                }
-                detailText = this.Phaserscene.add.text(
-                    150,
-                    630,
-                    `Level:${
-                        this.level
-                    }$\nRange:${this.getRange()}\nTốc độ bắn:${this.getCharge()}`,
-                    { fontStyle: 'bold', fontSize: '20px', fill: '#ff0000' , fontFamily: "roboto"}
-                );
-                detailTextClicked = false;
-                this.Phaserscene.time.addEvent({
-                    delay: 100,
-                    callback: () => (detailTextClicked = true),
-                    callbackScope: this,
-                    loop: true
-                });
-            });
-
-            this.on('pointerout', pointer => {
-                if (detailText) {
-                    detailText.destroy();
-                }
-                detailTextClicked = false;
-            });
         }
     }
 
