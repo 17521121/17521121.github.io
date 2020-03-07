@@ -6,13 +6,13 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.Phaserscene = scene;
-       
+
         this.level = level;
         this.isReady = true;
         this.range;
         this.price;
 
-        this.setDepth(1);
+        this.setDepth(3);
         this.setInteractive();
 
         this.posX = (this.x - CELL_SIZE / 2) / CELL_SIZE;
@@ -25,8 +25,6 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
     init() {
         this.price = this.getPrice();
         this.range = this.getRange();
-
-    
 
         this.getDisplaySize();
 
@@ -71,20 +69,25 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
             this.on('pointerdown', pointer => {
                 if (!isBuying) {
                     // console.log('tower clicked');
-                    if(rangeImage) {
-                        rangeImage.destroy()
+                    if (rangeImage) {
+                        rangeImage.destroy();
                     }
-                        
+
                     if (isTowerClicked) {
                         upgradeImage.destroy();
                         sellImage.destroy();
                     }
 
-                    rangeImage = this.Phaserscene.physics.add.image(this.x, this.y, "tower_range")
-                    rangeImage.setDisplaySize(this.range*2, this.range*2)
-                    rangeImage.setAlpha(0.4)
+                    rangeImage = this.Phaserscene.physics.add.image(
+                        this.x,
+                        this.y,
+                        'tower_range'
+                    );
+                    rangeImage.setDisplaySize(this.getRange() * 2, this.getRange() * 2);
+                    rangeImage.setAlpha(0.4);
+                    rangeImage.setDepth(3);
+                    rangeImage.setTint('0xfff000');
 
-                   
                     isTowerClicked = false;
                     this.Phaserscene.time.addEvent({
                         delay: 100,
@@ -133,14 +136,13 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                             this.level + 1
                         );
 
-                        
-                        rangeImage.destroy()
+                        rangeImage.destroy();
                         isTowerClicked = false;
-
+                        // rangeImage.setDisplaySize(tower.getRange() * 2, tower.getRange() * 2);
                         towers.push(tower);
                         upgradeImage.destroy();
-                        this.destroy();
                         sellImage.destroy();
+                        this.destroy();
                     });
 
                     upgradeImage.on('pointerover', pointer => {
@@ -237,7 +239,7 @@ class Tower extends Phaser.Physics.Arcade.Sprite {
                         });
 
                         isTowerClicked = false;
-                        rangeImage.destroy()
+                        rangeImage.destroy();
 
                         sellImage.destroy();
                         upgradeImage.destroy();

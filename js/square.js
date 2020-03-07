@@ -9,6 +9,7 @@ class Square extends Phaser.Physics.Arcade.Sprite {
         this.posX = x;
         this.posY = y;
         this.setAlpha(0.1);
+        // this.setDepth(2)
         if(isInit) {
             this.init();
         }
