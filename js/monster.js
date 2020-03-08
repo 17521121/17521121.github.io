@@ -20,7 +20,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         this.health;
         this.aimed = [];
         this.init();
-        
+
         this.lastPosX;
         this.lastPosY;
         this.tween;
@@ -34,32 +34,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
     init() {
         this.direction = 'down';
         this.setInteractive();
-        this.on('pointerdown', pointer => {
-            // console.log("monster clicked")
-            if (detailText) {
-                detailText.destroy();
-            }
-            detailText = this.Phaserscene.add.text(
-                150,
-                630,
-                `Máu: ${this.health}\nTốc độ: ${
-                    this.speed
-                }km/h\nVàng: ${this.getPrice()}`,
-                {
-                    fontStyle: 'bold',
-                    fontSize: '20px',
-                    fill: '#ff0000',
-                    fontFamily: 'roboto'
-                }
-            );
-            detailTextClicked = false;
-            this.Phaserscene.time.addEvent({
-                delay: 100,
-                callback: () => (detailTextClicked = true),
-                callbackScope: this,
-                loop: true
-            });
-        });
+        this.on('pointerdown', pointer => this.pointerdown());
 
         if (this.getName() == 'ani_beast') {
             this.Phaserscene.anims.create({
@@ -138,7 +113,33 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
             this.createPath(mazePuzzle);
         }
     }
-
+    pointerdown(pointer) {
+        // console.log("monster clicked")
+        if (detailText) {
+            detailText.destroy();
+        }
+        detailText = this.Phaserscene.add.text(
+            150,
+            630,
+            `Máu: ${this.health}\nTốc độ: ${
+                this.speed
+            }km/h\nVàng: ${this.getPrice()}`,
+            {
+                fontStyle: 'bold',
+                fontSize: '20px',
+                fill: '#ff0000',
+                fontFamily: 'roboto'
+            }
+        );
+        detailTextClicked = false;
+        this.Phaserscene.time.addEvent({
+            delay: 100,
+            callback: () => (detailTextClicked = true),
+            callbackScope: this,
+            loop: true
+        });
+    }
+    
     createPath(solved) {
         //solved is mazePuzzle
         if (this.type == 'landing') {
@@ -171,14 +172,13 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
                 onCompleteParams: [this]
             });
         } else if (this.type == 'flying') {
-            
             if (this.tween) {
                 //this.tween.stop();
                 return;
             }
 
             this.path = new Phaser.Curves.Path(this.x, this.y);
-           
+
             [START_POS, END_POS].forEach(i => {
                 this.path.lineTo(
                     CELL_SIZE * i[1] + CELL_SIZE / 2,
@@ -229,11 +229,10 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
     }
 
     setPosWithHealth(posX, posY) {
-
         this.lastPosX = this.x;
         this.lastPosY = this.y;
         this.setPosition(posX, posY);
-        if(this.type == "landing") {
+        if (this.type == 'landing') {
             if (this.lastPosX > this.x && this.direction != 'left') {
                 this.direction = 'left';
                 this.anims.play(`${this.getName()}_left`);
@@ -246,9 +245,8 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
             } else if (this.lastPosY < this.y && this.direction != 'down') {
                 this.direction = 'down';
                 this.anims.play(`${this.getName()}_down`);
-        }
-        
-        } else if(this.type == "flying") {
+            }
+        } else if (this.type == 'flying') {
             // butterfly
         }
 
